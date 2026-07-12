@@ -1,0 +1,2984 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FluxoLog · Gestão Comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  /* ==========================================================================
+     FLUXOLOG — DESIGN TOKENS
+  ========================================================================== */
+  :root{
+    --body-bg:#f4f6fa;
+    --surface:#ffffff;
+    --surface-alt:#f8fafc;
+    --surface-hover:#eef1f6;
+    --border:#e2e7ef;
+    --border-strong:#cdd5e1;
+    --text-primary:#1e293b;
+    --text-secondary:#475467;
+    --text-muted:#98a2b3;
+    --shadow-sm:0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.06);
+    --shadow-md:0 4px 10px rgba(16,24,40,0.06), 0 2px 4px rgba(16,24,40,0.05);
+    --shadow-lg:0 16px 40px rgba(16,24,40,0.14), 0 4px 10px rgba(16,24,40,0.06);
+    --input-bg:#ffffff;
+    --overlay-bg:rgba(15,23,42,0.45);
+
+    --navy-950:#0b1220;
+    --navy-900:#0f172a;
+    --navy-800:#16213a;
+    --navy-700:#1e293b;
+
+    --emerald-50:#ecfdf5;
+    --emerald-500:#10b981;
+    --emerald-600:#059669;
+    --emerald-700:#047857;
+
+    --coral-50:#fff1f2;
+    --coral-500:#f43f5e;
+    --coral-600:#e11d48;
+    --coral-700:#be123c;
+
+    --gold-400:#f0b429;
+    --blue-500:#3b82f6;
+
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:18px;
+    --radius-xl:24px;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+
+  html[data-theme="dark"]{
+    --body-bg:#0a0f1c;
+    --surface:#121a2b;
+    --surface-alt:#182338;
+    --surface-hover:#1d2942;
+    --border:#26324a;
+    --border-strong:#33415c;
+    --text-primary:#eef1f6;
+    --text-secondary:#a3adc2;
+    --text-muted:#6b7690;
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md:0 6px 16px rgba(0,0,0,0.4);
+    --shadow-lg:0 20px 48px rgba(0,0,0,0.55);
+    --input-bg:#0f1729;
+    --overlay-bg:rgba(3,7,18,0.65);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--body-bg);
+    color:var(--text-primary);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+    transition:background .25s var(--ease), color .25s var(--ease);
+  }
+  h1,h2,h3,h4,p{margin:0;}
+  button{font-family:inherit;}
+  input,select,textarea{font-family:inherit;}
+  ::selection{background:var(--emerald-500); color:#fff;}
+
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:99px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+
+  .hidden{display:none !important;}
+
+  .panel, .input, .btn, .sidebar, .topbar, .modal-box, .stat-card,
+  .data-table, .nav-item, .role-badge, .status-badge, .avatar, .pill,
+  .payment-method-option, .category-row, .restock-alert-banner{
+    transition:background .25s var(--ease), color .25s var(--ease),
+               border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+
+  /* ==========================================================================
+     BOTÕES
+  ========================================================================== */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px 20px; border-radius:var(--radius-sm); border:1px solid transparent;
+    font-size:14px; font-weight:600; cursor:pointer; transition:all .2s var(--ease);
+    white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{ background:var(--navy-900); color:#fff; box-shadow:var(--shadow-sm); }
+  .btn-primary:hover{ background:var(--navy-800); box-shadow:0 8px 24px rgba(16,185,129,0.18); transform:translateY(-1px); }
+  .btn-emerald{ background:var(--emerald-600); color:#fff; }
+  .btn-emerald:hover{ background:var(--emerald-700); box-shadow:0 8px 24px rgba(16,185,129,0.25); transform:translateY(-1px); }
+  .btn-coral{ background:transparent; color:var(--coral-600); border-color:var(--coral-500); }
+  .btn-coral:hover{ background:var(--coral-500); color:#fff; transform:translateY(-1px); }
+  .btn-coral-solid{ background:var(--coral-600); color:#fff; }
+  .btn-coral-solid:hover{ background:var(--coral-700); transform:translateY(-1px); box-shadow:0 8px 22px rgba(225,29,72,0.25); }
+  .btn-ghost{ background:transparent; color:var(--text-secondary); border-color:var(--border); }
+  .btn-ghost:hover{ background:var(--surface-hover); color:var(--text-primary); border-color:var(--border-strong); }
+  .btn-sm{padding:7px 14px; font-size:13px; border-radius:7px;}
+  .btn-icon{padding:9px; border-radius:8px;}
+  .btn-block{width:100%;}
+  .btn:disabled{opacity:.5; cursor:not-allowed; transform:none !important; box-shadow:none !important;}
+  .icon-danger-btn{ border:1.5px solid var(--border); background:var(--surface); color:var(--text-muted); }
+  .icon-danger-btn:hover{ background:var(--coral-50); border-color:var(--coral-500); color:var(--coral-600); }
+  html[data-theme="dark"] .icon-danger-btn:hover{ background:rgba(244,63,94,0.14); }
+
+  /* ==========================================================================
+     INPUTS
+  ========================================================================== */
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field label{font-size:13px; font-weight:600; color:var(--text-secondary);}
+  .field .hint{font-size:12px; color:var(--text-muted); font-weight:400;}
+  .input, select.input{
+    width:100%; padding:12px 14px; border-radius:var(--radius-sm);
+    border:1.5px solid var(--border); background:var(--input-bg);
+    font-size:14.5px; color:var(--text-primary); outline:none;
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .input::placeholder{color:var(--text-muted);}
+  .input:hover{border-color:var(--border-strong);}
+  .input:focus{ border-color:var(--emerald-600); box-shadow:0 0 0 4px rgba(16,185,129,0.12); }
+  .input-group{position:relative;}
+  .input-group .input{padding-left:42px;}
+  .input-group .icon{
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    color:var(--text-muted); display:flex; pointer-events:none;
+  }
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+
+  /* ==========================================================================
+     LOGIN / ONBOARDING
+  ========================================================================== */
+  .auth-screen{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(16,185,129,0.14), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(59,130,246,0.12), transparent 45%),
+      linear-gradient(160deg, var(--navy-950) 0%, var(--navy-900) 55%, var(--navy-800) 100%);
+    z-index:1000; padding:24px;
+  }
+  .auth-card{
+    width:100%; max-width:440px; background:var(--surface); border-radius:var(--radius-xl);
+    padding:44px 40px 36px; box-shadow:0 30px 80px rgba(0,0,0,0.35);
+    animation:cardIn .55s var(--ease) both;
+  }
+  @keyframes cardIn{ from{opacity:0; transform:translateY(24px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .auth-logo{display:flex; align-items:center; gap:10px; margin-bottom:28px;}
+  .auth-logo .mark{
+    width:40px; height:40px; border-radius:11px;
+    background:linear-gradient(135deg, var(--emerald-500), var(--navy-800));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:17px; box-shadow:0 8px 24px rgba(16,185,129,0.25);
+  }
+  .auth-logo .name{font-size:19px; font-weight:800; color:var(--text-primary); letter-spacing:-.02em;}
+  .auth-logo .name span{color:var(--emerald-600);}
+  .auth-head{margin-bottom:26px;}
+  .auth-head h1{font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-.02em; margin-bottom:6px;}
+  .auth-head p{font-size:14px; color:var(--text-secondary); line-height:1.5;}
+  .badge-setup{
+    display:inline-flex; align-items:center; gap:6px; background:var(--emerald-50); color:var(--emerald-700);
+    padding:5px 12px; border-radius:99px; font-size:12px; font-weight:700; margin-bottom:14px; letter-spacing:.02em;
+  }
+  html[data-theme="dark"] .badge-setup{ background:rgba(16,185,129,0.14); color:#34d399; }
+  .auth-error{
+    background:var(--coral-50); color:var(--coral-700); border:1px solid #fecdd3;
+    padding:10px 14px; border-radius:var(--radius-sm); font-size:13px; font-weight:600;
+    margin-bottom:16px; display:flex; align-items:center; gap:8px; animation:shake .35s var(--ease);
+  }
+  html[data-theme="dark"] .auth-error{ background:rgba(244,63,94,0.12); border-color:rgba(244,63,94,0.3); color:#fb7185; }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  .auth-footer{margin-top:20px; text-align:center; font-size:12.5px; color:var(--text-muted);}
+
+  /* ==========================================================================
+     APP SHELL
+  ========================================================================== */
+  .app-shell{ display:flex; height:100vh; width:100vw; overflow:hidden; opacity:0; animation:appIn .5s var(--ease) forwards; }
+  @keyframes appIn{ from{opacity:0;} to{opacity:1;} }
+
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--navy-950);
+    display:flex; flex-direction:column; padding:22px 14px; color:#fff;
+  }
+  .sidebar-logo{
+    display:flex; align-items:center; gap:10px; padding:0 8px 24px; margin-bottom:8px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo .mark{
+    width:36px; height:36px; border-radius:10px;
+    background:linear-gradient(135deg, var(--emerald-500), var(--blue-500));
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px;
+  }
+  .sidebar-logo .name{font-size:16.5px; font-weight:800; letter-spacing:-.02em;}
+  .sidebar-logo .name span{color:var(--emerald-500);}
+  .nav-group{margin-top:18px; display:flex; flex-direction:column; gap:3px;}
+  .nav-label{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#64748b; font-weight:700; padding:8px 12px 6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:10px;
+    color:#cbd5e1; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s var(--ease);
+    position:relative; border:none; background:transparent; width:100%; text-align:left;
+  }
+  .nav-item .ic{width:19px; height:19px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  .nav-item:hover{background:rgba(255,255,255,0.06); color:#fff;}
+  .nav-item.active{ background:linear-gradient(135deg, rgba(16,185,129,0.16), rgba(16,185,129,0.05)); color:#fff; }
+  .nav-item.active::before{
+    content:''; position:absolute; left:-14px; top:50%; transform:translateY(-50%);
+    width:3px; height:20px; border-radius:3px; background:var(--emerald-500);
+  }
+  .sidebar-bottom{margin-top:auto; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);}
+  .sidebar-hint{font-size:11.5px; color:#64748b; padding:10px 12px; line-height:1.5;}
+
+  .main{flex:1; display:flex; flex-direction:column; min-width:0;}
+  .topbar{
+    height:68px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 28px; background:var(--surface); border-bottom:1px solid var(--border);
+  }
+  .topbar-title h2{font-size:17.5px; font-weight:700; color:var(--text-primary); letter-spacing:-.01em;}
+  .topbar-title p{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
+  .user-chip{display:flex; align-items:center; gap:10px;}
+  .header-backup-actions{ display:flex; align-items:center; gap:8px; padding-right:14px; margin-right:2px; border-right:1px solid var(--border); }
+  @media (max-width:1150px){ .header-backup-actions{display:none;} }
+  .theme-toggle-btn{
+    width:38px; height:38px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface-alt);
+    color:var(--text-secondary); display:flex; align-items:center; justify-content:center;
+    font-size:17px; cursor:pointer; transition:all .2s var(--ease);
+  }
+  .theme-toggle-btn:hover{ border-color:var(--border-strong); background:var(--surface-hover); transform:translateY(-1px); }
+  .user-info{text-align:right;}
+  .user-info .u-name{font-size:13.5px; font-weight:700; color:var(--text-primary);}
+  .role-badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.05em; padding:2px 9px; border-radius:99px; margin-top:3px;
+  }
+  .role-badge.admin{background:#fef7e0; color:#8a6d1a;}
+  .role-badge.operador{background:#eaf1ff; color:#2554b8;}
+  html[data-theme="dark"] .role-badge.admin{background:rgba(240,180,41,0.16); color:#f0b429;}
+  html[data-theme="dark"] .role-badge.operador{background:rgba(59,130,246,0.16); color:#60a5fa;}
+  .avatar{
+    width:38px; height:38px; border-radius:10px;
+    background:linear-gradient(135deg, var(--navy-800), var(--navy-950));
+    color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+  }
+  .content{flex:1; overflow-y:auto; padding:28px;}
+  .tab-panel{display:none; animation:fadeSlide .35s var(--ease);}
+  .tab-panel.active{display:block;}
+  @keyframes fadeSlide{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  .placeholder-block{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:70px 30px; background:var(--surface); border:1.5px dashed var(--border);
+    border-radius:var(--radius-lg); color:var(--text-muted);
+  }
+  .placeholder-block .ic{width:52px; height:52px; margin-bottom:16px; color:var(--border-strong);}
+  .placeholder-block h3{font-size:16px; color:var(--text-secondary); margin-bottom:6px;}
+  .placeholder-block p{font-size:13.5px; max-width:360px; line-height:1.5;}
+
+  /* ==========================================================================
+     PAINÉIS / TABELAS GERAIS
+  ========================================================================== */
+  .panel{ background:var(--surface); border-radius:var(--radius-lg); border:1px solid var(--border); box-shadow:var(--shadow-sm); }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:10px; }
+  .panel-head h3{font-size:15.5px; font-weight:700; color:var(--text-primary);}
+  .panel-head p{font-size:12.5px; color:var(--text-muted); margin-top:3px;}
+  .panel-body{padding:22px 24px;}
+  table.data-table{width:100%; border-collapse:collapse;}
+  .data-table th{
+    text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--text-muted); font-weight:700; padding:0 14px 12px; border-bottom:1px solid var(--border);
+  }
+  .data-table td{ padding:14px; font-size:14px; color:var(--text-secondary); border-bottom:1px solid var(--border); }
+  .data-table tbody tr{transition:background .15s var(--ease);}
+  .data-table tbody tr:hover{background:var(--surface-alt);}
+  .data-table tbody tr:last-child td{border-bottom:none;}
+  .u-cell{display:flex; align-items:center; gap:11px;}
+  .u-avatar{
+    width:34px; height:34px; border-radius:9px; flex-shrink:0; background:var(--surface-alt); color:var(--text-primary);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;
+  }
+  .u-name-row{font-weight:600; color:var(--text-primary); font-size:13.5px;}
+  .u-username-row{font-size:12px; color:var(--text-muted);}
+  .table-actions{display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;}
+  .empty-row td{text-align:center; padding:40px; color:var(--text-muted); font-size:13.5px;}
+
+  /* ==========================================================================
+     MODAL
+  ========================================================================== */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:900; background:var(--overlay-bg); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none;
+    transition:opacity .25s var(--ease);
+  }
+  .modal-overlay.show{opacity:1; pointer-events:all;}
+  .modal-box{
+    width:100%; max-width:460px; background:var(--surface); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lg); transform:translateY(18px) scale(.96); opacity:0;
+    transition:all .3s var(--ease);
+    max-height:85vh; overflow-y:auto;
+    display:flex; flex-direction:column;
+  }
+  /* O <form> interno também precisa ser um container flex com min-height:0,
+     senão ele cresce livremente e quebra a cadeia de rolagem do modal-body,
+     fazendo os botões de Salvar/Cancelar saírem da tela sem barra de rolagem. */
+  .modal-box form{ display:flex; flex-direction:column; min-height:0; }
+  .modal-overlay.show .modal-box{transform:translateY(0) scale(1); opacity:1;}
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .modal-head h3{font-size:16px; font-weight:700; color:var(--text-primary);}
+  .modal-close{
+    width:30px; height:30px; border-radius:8px; border:none; background:var(--surface-alt); color:var(--text-secondary);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s var(--ease);
+  }
+  .modal-close:hover{background:var(--surface-hover); color:var(--text-primary);}
+  .modal-body{padding:22px 24px; overflow-y:auto; flex:1 1 auto; min-height:0;}
+  .modal-footer{ padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; flex-shrink:0; }
+  .role-select{display:flex; gap:10px;}
+  .role-option{
+    flex:1; padding:13px; border-radius:var(--radius-sm); border:1.5px solid var(--border);
+    cursor:pointer; text-align:center; transition:all .2s var(--ease);
+  }
+  .role-option .r-title{font-size:13.5px; font-weight:700; color:var(--text-secondary);}
+  .role-option .r-desc{font-size:11px; color:var(--text-muted); margin-top:2px;}
+  .role-option:hover{border-color:var(--border-strong);}
+  .role-option.selected{border-color:var(--navy-800); background:var(--surface-alt); box-shadow:0 0 0 3px rgba(15,23,42,0.08);}
+  .role-option.selected.is-admin{border-color:var(--gold-400); box-shadow:0 0 0 3px rgba(240,180,41,0.15);}
+
+  /* toast */
+  .toast-wrap{position:fixed; bottom:24px; right:24px; z-index:1200; display:flex; flex-direction:column; gap:10px;}
+  .toast{
+    background:var(--navy-900); color:#fff; padding:13px 18px; border-radius:var(--radius-sm);
+    font-size:13.5px; font-weight:600; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:10px;
+    animation:toastIn .3s var(--ease); min-width:240px;
+  }
+  .toast.success{background:var(--emerald-700);}
+  .toast.error{background:var(--coral-700);}
+  @keyframes toastIn{ from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);} }
+
+  /* ==========================================================================
+     PDV — FRENTE DE CAIXA
+  ========================================================================== */
+  .pdv-grid{ display:grid; grid-template-columns:380px 1fr; gap:22px; align-items:start; }
+  .pdv-launch .panel-body{padding-bottom:24px;}
+  .pdv-divider{height:1px; background:var(--border); margin:6px 0 18px;}
+  .pdv-cart{display:flex; flex-direction:column;}
+  .pdv-total-box{
+    display:flex; align-items:center; justify-content:space-between; margin:0 24px; padding:18px 20px;
+    background:linear-gradient(135deg, var(--navy-950), var(--navy-800)); border-radius:var(--radius-md); color:#fff;
+  }
+  .pdv-total-label{font-size:12.5px; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.05em;}
+  .pdv-total-sub{font-size:12px; color:#94a3b8; margin-top:3px;}
+  .pdv-total-value{font-size:28px; font-weight:800; color:var(--emerald-500); letter-spacing:-.02em;}
+  .pdv-finalize-btn{ padding:15px 20px; font-size:15px; margin-top:20px; box-shadow:0 8px 24px rgba(16,185,129,0.25); }
+  .pdv-shortcuts-hint{
+    margin-top:16px; padding:11px 13px; background:var(--surface-alt); border:1px dashed var(--border);
+    border-radius:var(--radius-sm); font-size:11.5px; color:var(--text-secondary); line-height:1.6;
+  }
+  .pdv-shortcuts-hint b{color:var(--text-primary);}
+
+  /* ==========================================================================
+     CLIENTES — busca no PDV, chip de identificação e histórico
+  ========================================================================== */
+  .customer-results{
+    position:absolute; top:100%; left:0; right:0; z-index:40;
+    background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    box-shadow:var(--shadow-md); margin-top:4px; max-height:220px; overflow-y:auto;
+  }
+  .customer-results:empty{ display:none; border:none; box-shadow:none; }
+  .customer-result-item{
+    padding:10px 14px; cursor:pointer; transition:background .15s var(--ease);
+    border-bottom:1px solid var(--border);
+  }
+  .customer-result-item:last-child{border-bottom:none;}
+  .customer-result-item:hover{background:var(--surface-alt);}
+  .customer-result-name{font-size:13.5px; font-weight:600; color:var(--text-primary);}
+  .customer-result-cpf{font-size:11.5px; color:var(--text-muted);}
+  .customer-result-empty{padding:12px 14px; font-size:12.5px; color:var(--text-muted);}
+
+  .customer-chip{
+    display:flex; align-items:center; gap:10px; margin-top:10px;
+    padding:10px 12px; background:var(--emerald-50); border:1.5px solid #a7f3d0;
+    border-radius:var(--radius-sm);
+  }
+  html[data-theme="dark"] .customer-chip{ background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.35); }
+  .customer-chip-icon{font-size:18px;}
+  .customer-chip-name{font-size:13.5px; font-weight:700; color:var(--emerald-700);}
+  html[data-theme="dark"] .customer-chip-name{ color:#34d399; }
+  .customer-chip-cpf{font-size:11.5px; color:var(--text-muted);}
+  .customer-chip-remove{
+    margin-left:auto; width:26px; height:26px; border-radius:7px; border:none;
+    background:transparent; color:var(--emerald-700); cursor:pointer; font-size:13px;
+    display:flex; align-items:center; justify-content:center; transition:all .2s var(--ease);
+  }
+  .customer-chip-remove:hover{background:rgba(16,185,129,0.15);}
+
+  .customer-history-item{
+    padding:13px 0; border-bottom:1px solid var(--border);
+  }
+  .customer-history-item:last-child{border-bottom:none;}
+  .customer-history-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
+  .customer-history-date{font-size:12.5px; font-weight:700; color:var(--text-primary);}
+  .customer-history-value{font-size:13.5px; font-weight:800; color:var(--emerald-600);}
+  .customer-history-products{font-size:12.5px; color:var(--text-secondary); line-height:1.5;}
+  .cart-remove-btn{
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--surface);
+    color:var(--text-muted); display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s var(--ease);
+  }
+  .cart-remove-btn:hover{background:var(--coral-50); border-color:var(--coral-500); color:var(--coral-600);}
+  html[data-theme="dark"] .cart-remove-btn:hover{background:rgba(244,63,94,0.14);}
+  .cart-inline-input{
+    width:64px; padding:7px 8px; border-radius:7px; border:1.5px solid var(--border); background:var(--input-bg);
+    font-size:13.5px; color:var(--text-primary); text-align:center;
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .cart-inline-input:hover{border-color:var(--border-strong);}
+  .cart-inline-input:focus{ outline:none; border-color:var(--emerald-600); box-shadow:0 0 0 3px rgba(16,185,129,0.12); }
+  .cart-product-name{font-weight:600; color:var(--text-primary); font-size:13.5px;}
+  .cart-product-code{font-size:11.5px; color:var(--text-muted);}
+  .badge-critical-stock{
+    display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.03em; background:#fffbeb; color:#92400e; border:1px solid #fde68a;
+    padding:2px 8px; border-radius:99px; margin-left:8px; vertical-align:middle;
+  }
+  html[data-theme="dark"] .badge-critical-stock{ background:rgba(240,180,41,0.16); color:#fbbf24; border-color:rgba(240,180,41,0.4); }
+  .payment-method-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .payment-method-option{
+    display:flex; flex-direction:column; align-items:center; gap:6px; padding:18px 10px; border-radius:var(--radius-md);
+    border:1.5px solid var(--border); background:var(--surface); cursor:pointer; transition:all .2s var(--ease);
+  }
+  .payment-method-option:hover{border-color:var(--border-strong); background:var(--surface-alt);}
+  .payment-method-option.selected{ border-color:var(--navy-800); background:var(--surface-alt); box-shadow:0 0 0 3px rgba(15,23,42,0.08); }
+  .payment-method-option .pm-icon{font-size:22px;}
+  .payment-method-option .pm-title{font-size:13.5px; font-weight:700; color:var(--text-secondary);}
+
+  /* ==========================================================================
+     INVENTÁRIO — CARDS, GRÁFICO, TOGGLE, BADGES
+  ========================================================================== */
+  .restock-alert-banner{
+    display:flex; align-items:center; gap:12px; padding:14px 20px; border-radius:var(--radius-md);
+    font-size:14px; font-weight:700; margin-bottom:18px;
+    background:#fffbeb; border:1.5px solid #fde68a; color:#92400e;
+  }
+  .restock-alert-banner.ok{ background:var(--emerald-50); border-color:#a7f3d0; color:var(--emerald-700); }
+  html[data-theme="dark"] .restock-alert-banner{ background:rgba(240,180,41,0.1); border-color:rgba(240,180,41,0.35); color:#fbbf24; }
+  html[data-theme="dark"] .restock-alert-banner.ok{ background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.35); color:#34d399; }
+  .restock-alert-icon{font-size:18px;}
+  .estoque-top-grid{ display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:stretch; }
+  .estoque-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-sm);
+    transition:box-shadow .2s var(--ease), transform .2s var(--ease);
+  }
+  .stat-card:hover{box-shadow:var(--shadow-md); transform:translateY(-2px);}
+  .stat-icon{ width:38px; height:38px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .stat-icon.emerald{background:var(--emerald-50); color:var(--emerald-600);}
+  .stat-icon.navy{background:var(--surface-alt); color:var(--text-primary);}
+  .stat-icon.coral{background:var(--coral-50); color:var(--coral-600);}
+  html[data-theme="dark"] .stat-icon.emerald{background:rgba(16,185,129,0.14);}
+  html[data-theme="dark"] .stat-icon.coral{background:rgba(244,63,94,0.14);}
+  .stat-label{font-size:12px; color:var(--text-secondary); font-weight:600;}
+  .stat-value{font-size:20px; font-weight:800; color:var(--text-primary); margin-top:2px;}
+  .estoque-chart-panel{display:flex; flex-direction:column;}
+  .estoque-chart-panel .panel-body{ flex:1; }
+  .chart-compact-body{
+    display:flex; align-items:center; justify-content:center;
+    height:200px; max-height:200px; padding:14px 24px !important;
+  }
+  .chart-compact-body canvas{ max-height:190px !important; }
+  .stock-alert-badge{
+    display:inline-block; margin-left:6px; font-size:10px; font-weight:700; text-transform:uppercase;
+    color:var(--coral-600); background:var(--coral-50); padding:1px 7px; border-radius:99px;
+  }
+  html[data-theme="dark"] .stock-alert-badge{ background:rgba(244,63,94,0.14); }
+  .status-badge{ display:inline-flex; align-items:center; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+  .status-badge.active{background:var(--emerald-50); color:var(--emerald-700);}
+  .status-badge.inactive{background:var(--surface-alt); color:var(--text-muted);}
+  html[data-theme="dark"] .status-badge.active{background:rgba(16,185,129,0.14);}
+  .stock-readonly{
+    padding:12px 14px; background:var(--surface-alt); border:1.5px solid var(--border);
+    border-radius:var(--radius-sm); font-weight:700; color:var(--text-secondary); font-size:14.5px;
+  }
+  .toggle-row{display:flex; align-items:center; gap:12px; margin-top:4px;}
+  .toggle-title{font-size:13.5px; font-weight:600; color:var(--text-secondary);}
+  .toggle-desc{font-size:12px; color:var(--text-muted);}
+  .switch{position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; cursor:pointer; inset:0; background:var(--border-strong); transition:.2s var(--ease); border-radius:999px;}
+  .slider::before{content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#fff; transition:.2s var(--ease); border-radius:50%; box-shadow:var(--shadow-sm);}
+  .switch input:checked + .slider{background:var(--emerald-500);}
+  .switch input:checked + .slider::before{transform:translateX(20px);}
+  .category-row{
+    display:flex; align-items:center; justify-content:space-between; padding:11px 0;
+    border-bottom:1px solid var(--border); font-size:14px; color:var(--text-secondary); font-weight:600;
+  }
+  .category-row:last-child{border-bottom:none;}
+  @media (max-width:1050px){ .estoque-top-grid{grid-template-columns:1fr;} }
+
+  /* ==========================================================================
+     RELATÓRIOS
+  ========================================================================== */
+  .report-filter-pills{display:flex; gap:10px; flex-wrap:wrap;}
+  .pill{
+    padding:9px 18px; border-radius:99px; border:1.5px solid var(--border); background:var(--surface);
+    font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all .2s var(--ease);
+  }
+  .pill:hover{border-color:var(--border-strong); background:var(--surface-alt);}
+  .pill.active{background:var(--navy-900); border-color:var(--navy-900); color:#fff;}
+  .report-cards{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;}
+  @media (max-width:900px){ .report-cards{grid-template-columns:1fr;} }
+  .type-badge{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:99px; }
+  .type-badge.venda{background:var(--emerald-50); color:var(--emerald-700);}
+  .type-badge.sangria{background:var(--coral-50); color:var(--coral-700);}
+  html[data-theme="dark"] .type-badge.venda{background:rgba(16,185,129,0.14);}
+  html[data-theme="dark"] .type-badge.sangria{background:rgba(244,63,94,0.14);}
+  .sangria-detail-row td{ background:var(--coral-50); padding:11px 14px !important; border-bottom:1px solid var(--border); }
+  html[data-theme="dark"] .sangria-detail-row td{ background:rgba(244,63,94,0.08); }
+  .sangria-detail-box{ font-size:12.5px; color:var(--coral-700); display:flex; gap:22px; flex-wrap:wrap; }
+  html[data-theme="dark"] .sangria-detail-box{ color:#fb7185; }
+  .sangria-detail-box b{color:inherit;}
+
+  /* ==========================================================================
+     CURVA ABC — badges de classificação e barra de giro
+  ========================================================================== */
+  .abc-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:8px; font-size:12.5px; font-weight:800;
+  }
+  .abc-badge.classe-a{ background:var(--emerald-50); color:var(--emerald-700); }
+  .abc-badge.classe-b{ background:#fffbeb; color:#92400e; }
+  .abc-badge.classe-c{ background:var(--surface-alt); color:var(--text-muted); }
+  html[data-theme="dark"] .abc-badge.classe-a{ background:rgba(16,185,129,0.16); color:#34d399; }
+  html[data-theme="dark"] .abc-badge.classe-b{ background:rgba(240,180,41,0.16); color:#fbbf24; }
+  .abc-revenue-cell{display:flex; flex-direction:column; gap:5px; min-width:130px;}
+  .abc-bar-track{width:100%; height:6px; border-radius:99px; background:var(--surface-alt); overflow:hidden;}
+  .abc-bar-fill{height:100%; border-radius:99px; background:linear-gradient(90deg, var(--emerald-500), var(--emerald-600));}
+  .abc-product-name{font-weight:600; color:var(--text-primary); font-size:13.5px;}
+  .report-actions-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:4px; }
+  .print-only{display:none;}
+  .print-header{padding-bottom:16px; margin-bottom:18px; border-bottom:2px solid var(--navy-900);}
+  .print-header-top{display:flex; align-items:center; justify-content:space-between;}
+  .print-header-brand{display:flex; align-items:center; gap:8px; font-size:18px; font-weight:800; color:var(--navy-900);}
+  .print-header-mark{
+    width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg, var(--emerald-500), var(--navy-800));
+    color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
+  }
+  .print-header-tag{
+    font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-muted); border:1px solid var(--border-strong); padding:4px 10px; border-radius:99px;
+  }
+  #printReportMeta{font-size:12.5px; color:var(--text-muted); margin-top:8px;}
+  .print-footer{ margin-top:22px; padding-top:12px; border-top:1px solid var(--border-strong); font-size:11px; color:var(--text-muted); text-align:center; }
+
+  @media print{
+    @page{ margin: 16mm 14mm; }
+    body *{ visibility:hidden; }
+    #printReportArea, #printReportArea *{ visibility:visible; }
+    #printReportArea{ position:absolute; top:0; left:0; width:100%; padding:0; margin:0; }
+    .print-only{ display:block; }
+    body{ background:#fff; overflow:visible; }
+    .sidebar, .topbar, .menu-toggle, .toast-wrap, .modal-overlay, .report-actions-row,
+    #relatoriosAdminView, #relatoriosOperatorView, #reportEmptyState{ display:none !important; }
+    .panel, .stat-card{ box-shadow:none !important; border:1px solid #d0d5dd !important; background:#fff !important; break-inside:avoid; }
+    .report-cards{ grid-template-columns:repeat(3, 1fr) !important; gap:10px !important; }
+    .stat-value, .data-table th, .data-table td, .print-header-brand{ color:#000 !important; }
+    .abc-badge, .abc-bar-fill, .type-badge, .status-badge{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table{ page-break-inside:auto; }
+    tr{ page-break-inside:avoid; page-break-after:auto; }
+  }
+
+  /* responsivo */
+  @media (max-width:900px){
+    .sidebar{
+      position:fixed; left:0; top:0; bottom:0; z-index:500;
+      transform:translateX(-100%); transition:transform .3s var(--ease); box-shadow:var(--shadow-lg);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .content{padding:18px;}
+    .topbar{padding:0 16px;}
+    .row-2{grid-template-columns:1fr;}
+    .user-info{display:none;}
+    .pdv-grid{grid-template-columns:1fr;}
+  }
+  .menu-toggle{display:none;}
+  @media (max-width:900px){
+    .menu-toggle{
+      display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px;
+      border:1px solid var(--border); background:var(--surface); cursor:pointer; margin-right:10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TELA DE AUTENTICAÇÃO (Login OU Primeiro Cadastro do Admin)
+============================================================= -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card" id="authCard">
+    <div class="auth-logo">
+      <div class="mark">FL</div>
+      <div class="name">Fluxo<span>Log</span></div>
+    </div>
+
+    <div id="loginView">
+      <div class="auth-head">
+        <h1>Acesse sua conta</h1>
+        <p>Entre com suas credenciais para abrir o painel de gestão.</p>
+      </div>
+      <div id="loginError" class="auth-error hidden"></div>
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label>Usuário</label>
+          <div class="input-group">
+            <span class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" class="input" id="loginUsername" placeholder="seu.usuario" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="input-group">
+            <span class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <input type="password" class="input" id="loginPassword" placeholder="••••••••" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">Entrar no sistema</button>
+      </form>
+      <div class="auth-footer">FluxoLog © 2026 — Gestão comercial local e segura.</div>
+    </div>
+
+    <div id="setupView" class="hidden">
+      <span class="badge-setup">✦ Primeiro acesso</span>
+      <div class="auth-head">
+        <h1>Crie a conta do Administrador</h1>
+        <p>Nenhum usuário foi encontrado. Configure a conta principal para começar a usar o FluxoLog.</p>
+      </div>
+      <div id="setupError" class="auth-error hidden"></div>
+      <form id="setupForm" autocomplete="off">
+        <div class="field">
+          <label>Seu nome completo</label>
+          <input type="text" class="input" id="setupName" placeholder="Ex: Maria Oliveira" required>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Usuário (login)</label>
+            <input type="text" class="input" id="setupUsername" placeholder="admin" required>
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input type="password" class="input" id="setupPassword" placeholder="••••••••" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-emerald btn-block" style="margin-top:6px;">Criar conta e entrar</button>
+      </form>
+      <div class="auth-footer">Você será o Administrador principal desta instalação.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APLICAÇÃO PRINCIPAL
+============================================================= -->
+<div id="appShell" class="app-shell hidden">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="mark">FL</div>
+      <div class="name">Fluxo<span>Log</span></div>
+    </div>
+
+    <nav class="nav-group">
+      <div class="nav-label">Operação</div>
+      <button class="nav-item active" data-tab="pdv">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span> PDV — Frente de Caixa
+      </button>
+      <button class="nav-item" data-tab="estoque" data-role="admin">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.29 7 12 12l8.71-5"/><path d="M12 22V12"/></svg></span> Inventário &amp; Estoque
+      </button>
+      <button class="nav-item" data-tab="relatorios">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span> Relatórios
+      </button>
+      <div class="nav-label" data-role="admin">Administração</div>
+      <button class="nav-item" data-tab="clientes" data-role="admin">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Clientes
+      </button>
+      <button class="nav-item" data-tab="usuarios" data-role="admin">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Usuários
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-hint">Dados salvos localmente neste navegador via LocalStorage.</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex; align-items:center;">
+        <div class="menu-toggle" id="menuToggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </div>
+        <div class="topbar-title">
+          <h2 id="topbarTitle">PDV — Frente de Caixa</h2>
+          <p id="topbarSubtitle">Registre vendas e sangrias em tempo real</p>
+        </div>
+      </div>
+
+      <div class="user-chip">
+        <div class="header-backup-actions" data-role="admin">
+          <button class="btn btn-ghost btn-sm" id="exportBackupBtn" title="Baixar um arquivo .json com todos os dados do sistema">💾 Exportar Backup</button>
+          <button class="btn btn-ghost btn-sm" id="restoreBackupBtn" title="Carregar um arquivo de backup previamente exportado">📂 Importar Backup</button>
+          <input type="file" id="restoreBackupInput" accept=".json,application/json" class="hidden">
+        </div>
+
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Alternar tema claro/escuro">
+          <span id="themeToggleIcon">☀️</span>
+        </button>
+
+        <div class="user-info">
+          <div class="u-name" id="headerUserName">—</div>
+          <span class="role-badge admin" id="headerRoleBadge">Admin</span>
+        </div>
+        <div class="avatar" id="headerAvatar">—</div>
+        <button class="btn btn-ghost btn-icon" id="logoutBtn" title="Sair">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ==================== ABA: PDV ==================== -->
+      <section class="tab-panel active" id="tab-pdv">
+        <div class="pdv-grid">
+
+          <div class="panel pdv-launch">
+            <div class="panel-head">
+              <div>
+                <h3>Bipar produto</h3>
+                <p>Aponte o leitor para o código de barras ou digite e pressione Enter.</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="field">
+                <label>Bipar Código de Barras</label>
+                <div class="input-group">
+                  <span class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="5" x2="3" y2="19"/><line x1="7" y1="5" x2="7" y2="19"/><line x1="11" y1="5" x2="11" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/><line x1="19" y1="5" x2="19" y2="19"/><line x1="21" y1="5" x2="21" y2="19"/></svg></span>
+                  <input type="text" class="input" id="pdvBarcodeInput" placeholder="Bipe ou digite o código..." autocomplete="off">
+                </div>
+                <span class="hint" id="pdvBarcodeHint">O item entra no carrinho automaticamente ao bipar ou pressionar Enter.</span>
+              </div>
+
+              <div class="field">
+                <label>Quantidade <span class="hint">(aplicada ao próximo item bipado)</span></label>
+                <input type="number" class="input" id="pdvQtyOverride" min="1" step="1" value="1">
+              </div>
+
+              <div class="pdv-divider"></div>
+
+              <div class="field" style="position:relative;">
+                <label>Identificar Cliente <span class="hint">(opcional)</span></label>
+                <div class="input-group">
+                  <span class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                  <input type="text" class="input" id="pdvCustomerSearch" placeholder="Buscar por nome ou CPF..." autocomplete="off">
+                </div>
+                <div class="customer-results" id="pdvCustomerResults"></div>
+                <div class="customer-chip hidden" id="pdvCustomerChip">
+                  <span class="customer-chip-icon">👤</span>
+                  <div>
+                    <div class="customer-chip-name" id="pdvCustomerChipName">—</div>
+                    <div class="customer-chip-cpf" id="pdvCustomerChipCpf">—</div>
+                  </div>
+                  <button type="button" class="customer-chip-remove" id="pdvCustomerRemoveBtn" title="Remover identificação">✕</button>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm btn-block" id="pdvNewCustomerBtn" style="margin-top:8px;">
+                  + Cadastrar novo cliente
+                </button>
+                <span class="hint">Se o cliente não quiser se identificar, deixe em branco — a venda segue como "Consumidor Geral".</span>
+              </div>
+
+              <div class="pdv-divider"></div>
+
+              <div class="field">
+                <label>Forma de pagamento</label>
+                <div style="display:flex; gap:8px;">
+                  <select class="input" id="pdvPaymentMethod">
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="pix">PIX</option>
+                    <option value="debito">Cartão de Débito</option>
+                    <option value="credito">Cartão de Crédito</option>
+                  </select>
+                  <button type="button" class="btn btn-ghost btn-icon" id="openPaymentModalBtn" title="Abrir seleção de pagamento (F10)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field hidden" id="pdvInstallmentsWrap">
+                <label>Parcelas</label>
+                <select class="input" id="pdvInstallments"></select>
+              </div>
+
+              <div class="field">
+                <label>Observações <span class="hint">(opcional)</span></label>
+                <input type="text" class="input" id="pdvObs" placeholder="Ex: cliente balcão, retirada, etc.">
+              </div>
+
+              <div class="pdv-divider"></div>
+
+              <button type="button" class="btn btn-coral btn-block" id="pdvSangriaBtn" title="Realizar sangria de caixa (F7)">💸 Realizar Sangria</button>
+
+              <div class="pdv-shortcuts-hint">
+                <b>Atalhos:</b> F2 bipagem · F4 quantidade · F7 sangria · F10 pagamento · Esc fecha modais · Ctrl+Delete limpa carrinho
+              </div>
+            </div>
+          </div>
+
+          <div class="panel pdv-cart">
+            <div class="panel-head">
+              <div>
+                <h3>Carrinho da venda</h3>
+                <p>Itens que serão registrados nesta venda.</p>
+              </div>
+            </div>
+            <div class="panel-body" style="padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Produto</th><th>Qtd.</th><th>Unit.</th><th>Subtotal</th><th></th></tr>
+                </thead>
+                <tbody id="pdvCartBody">
+                  <tr class="empty-row"><td colspan="5">Nenhum item adicionado ainda.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pdv-total-box">
+              <div>
+                <div class="pdv-total-label">Total geral</div>
+                <div class="pdv-total-sub" id="pdvItemCount">0 itens no carrinho</div>
+              </div>
+              <div class="pdv-total-value" id="pdvTotalValue">R$ 0,00</div>
+            </div>
+
+            <div class="panel-body" style="padding-top:0;">
+              <button class="btn btn-emerald btn-block pdv-finalize-btn" id="pdvFinalizeBtn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Confirmar e finalizar venda
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== ABA: ESTOQUE ==================== -->
+      <section class="tab-panel" id="tab-estoque">
+
+        <div class="restock-alert-banner" id="restockAlertBanner">
+          <span class="restock-alert-icon" id="restockAlertIcon">⚠️</span>
+          <span id="restockAlertText">Verificando níveis de estoque...</span>
+        </div>
+
+        <div class="estoque-top-grid">
+          <div class="estoque-cards">
+            <div class="stat-card">
+              <div class="stat-icon emerald"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div><div class="stat-label">Valor total em estoque</div><div class="stat-value" id="statTotalStockValue">R$ 0,00</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon navy"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></div>
+              <div><div class="stat-label">Produtos cadastrados</div><div class="stat-value" id="statTotalProducts">0</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              <div><div class="stat-label">Abaixo do estoque mínimo</div><div class="stat-value" id="statLowStock">0</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon emerald"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+              <div><div class="stat-label">Markup médio</div><div class="stat-value" id="statAvgMarkup">—</div></div>
+            </div>
+          </div>
+
+          <div class="panel estoque-chart-panel">
+            <div class="panel-head">
+              <div><h3>Distribuição por categoria</h3><p>Valor em estoque (R$) agrupado por categoria</p></div>
+            </div>
+            <div class="panel-body chart-compact-body">
+              <canvas id="stockCategoryChart" height="150"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <div class="panel-head">
+            <div><h3>Produtos</h3><p>Gerencie o catálogo, preços e níveis de estoque.</p></div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-ghost btn-sm" id="openCategoryModalBtn">Gerenciar categorias</button>
+              <button class="btn btn-primary btn-sm" id="openNewProductModal">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Novo produto
+              </button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Código</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque mín.</th><th>Saldo atual</th><th>Status</th><th style="text-align:right;">Ações</th></tr>
+              </thead>
+              <tbody id="productsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ABA: RELATÓRIOS ==================== -->
+      <section class="tab-panel" id="tab-relatorios">
+
+        <div id="relatoriosOperatorView" class="hidden">
+          <div class="panel" style="padding:44px 30px; text-align:center;">
+            <h3 style="font-size:17px; margin-bottom:8px;">Seu relatório diário</h3>
+            <p class="hint" style="display:block; margin-bottom:22px; font-size:13.5px;">
+              Como operador, você visualiza apenas as vendas e sangrias que você mesmo realizou hoje.
+            </p>
+            <button class="btn btn-primary" id="generateMyReportBtn">Gerar Meu Relatório Diário</button>
+          </div>
+        </div>
+
+        <div id="relatoriosAdminView" class="hidden">
+          <div class="panel">
+            <div class="panel-head">
+              <div><h3>Filtros do relatório</h3><p>Escolha o período que deseja analisar.</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="report-filter-pills">
+                <button type="button" class="pill active" data-period="diario">Diário</button>
+                <button type="button" class="pill" data-period="semanal">Semanal</button>
+                <button type="button" class="pill" data-period="mensal">Mensal</button>
+                <button type="button" class="pill" data-period="personalizado">Período personalizado</button>
+              </div>
+              <div class="row-2 hidden" id="customDateRow" style="margin-top:18px;">
+                <div class="field"><label>Data inicial</label><input type="date" class="input" id="reportDateStart"></div>
+                <div class="field"><label>Data final</label><input type="date" class="input" id="reportDateEnd"></div>
+              </div>
+              <button class="btn btn-primary btn-sm" id="applyReportFilterBtn" style="margin-top:16px;">Aplicar filtro</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="reportResults" class="hidden" style="margin-top:20px;">
+
+          <div class="report-actions-row">
+            <div>
+              <h3 style="font-size:15.5px; font-weight:700; color:var(--text-primary);">Resultado do relatório</h3>
+              <p class="hint" style="display:block;">Confira os indicadores e o histórico completo do período.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="printReportBtn">🖨️ Imprimir / Gerar PDF</button>
+          </div>
+
+          <div id="printReportArea">
+            <div class="print-only print-header">
+              <div class="print-header-top">
+                <div class="print-header-brand"><span class="print-header-mark">FL</span><span>FluxoLog</span></div>
+                <span class="print-header-tag">Relatório Financeiro</span>
+              </div>
+              <p id="printReportMeta">Período: — · Gerado em: —</p>
+            </div>
+
+            <div class="report-cards">
+              <div class="stat-card">
+                <div class="stat-icon emerald"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <div><div class="stat-label">Faturamento bruto</div><div class="stat-value" id="reportGrossRevenue">R$ 0,00</div></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></div>
+                <div><div class="stat-label">Total em sangrias</div><div class="stat-value" id="reportTotalSangrias">R$ 0,00</div></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon navy"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <div><div class="stat-label">Saldo líquido esperado em caixa</div><div class="stat-value" id="reportNetBalance">R$ 0,00</div></div>
+              </div>
+            </div>
+
+            <!-- BLOCO EXCLUSIVO DO ADMIN: Lucro Líquido + Curva ABC -->
+            <div id="profitAnalysisWrap" class="hidden">
+              <div class="report-cards" id="profitCardsRow" style="margin-top:20px;">
+                <div class="stat-card">
+                  <div class="stat-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+                  <div><div class="stat-label">Custo total dos produtos vendidos</div><div class="stat-value" id="reportTotalCost">R$ 0,00</div></div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon emerald"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>
+                  <div><div class="stat-label">Lucro líquido real</div><div class="stat-value" id="reportNetProfit">R$ 0,00</div></div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon navy"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                  <div><div class="stat-label">Margem de lucro média</div><div class="stat-value" id="reportProfitMargin">0%</div></div>
+                </div>
+              </div>
+              <p class="hint" id="profitCostFallbackNote" style="display:block; margin-top:8px;"></p>
+
+              <div class="panel" style="margin-top:20px;">
+                <div class="panel-head">
+                  <div><h3>Produtos mais vendidos — Curva ABC</h3><p>Ranking por impacto no faturamento do período selecionado</p></div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                  <table class="data-table">
+                    <thead>
+                      <tr><th>Produto</th><th>Código</th><th>Giro</th><th>Faturamento</th><th>% do total</th><th>Classe</th></tr>
+                    </thead>
+                    <tbody id="abcTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top:20px;">
+              <div class="panel-head">
+                <div><h3>Histórico de lançamentos</h3><p id="reportPeriodLabel">Período selecionado</p></div>
+              </div>
+              <div class="panel-body" style="padding:0;">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Data/Hora</th><th>Tipo</th><th>Operador</th><th>Pagamento</th><th style="text-align:right;">Valor</th></tr>
+                  </thead>
+                  <tbody id="reportTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="print-only print-footer">Documento gerado automaticamente pelo FluxoLog · Uso interno</div>
+          </div>
+        </div>
+
+        <div class="placeholder-block" id="reportEmptyState">
+          <div class="ic"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+          <h3>Nenhum relatório gerado ainda</h3>
+          <p>Selecione um período e clique em "Aplicar filtro" para visualizar o faturamento, as sangrias e o histórico de lançamentos.</p>
+        </div>
+      </section>
+
+      <!-- ==================== ABA: CLIENTES ==================== -->
+      <section class="tab-panel" id="tab-clientes">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Clientes cadastrados</h3>
+              <p>Identifique clientes recorrentes e analise o histórico de compras.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="openNewCustomerModalFromTab">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo cliente
+            </button>
+          </div>
+          <div class="panel-body">
+            <div class="field" style="margin-bottom:18px;">
+              <input type="text" class="input" id="customerTableSearch" placeholder="Buscar por nome ou CPF...">
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Cliente</th><th>CPF</th><th>Compras</th><th>Última compra</th><th>Total gasto</th><th style="text-align:right;">Ações</th></tr>
+              </thead>
+              <tbody id="customersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ABA: USUÁRIOS ==================== -->
+      <section class="tab-panel" id="tab-usuarios">
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-head">
+            <div><h3>Usuários do sistema</h3><p>Gerencie quem pode acessar o FluxoLog e com qual nível de permissão.</p></div>
+            <button class="btn btn-primary btn-sm" id="openNewUserModal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo usuário
+            </button>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Usuário</th><th>Login</th><th>Nível de acesso</th><th style="text-align:right;">Ações</th></tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ============================================================
+     MODAL: NOVO USUÁRIO / EDITAR USUÁRIO / EDITAR PRÓPRIO PERFIL
+============================================================= -->
+<div class="modal-overlay" id="userModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="userModalTitle">Novo usuário</h3>
+      <button class="modal-close" id="closeUserModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="userForm">
+      <div class="modal-body">
+        <input type="hidden" id="userFormId">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" class="input" id="userFormName" placeholder="Ex: João Pereira" required>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Usuário (login)</label>
+            <input type="text" class="input" id="userFormUsername" placeholder="joao.pereira" required>
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input type="password" class="input" id="userFormPassword" placeholder="••••••••" required>
+            <span class="hint" id="passwordEditHint" style="display:none;">Deixe em branco para manter a senha atual.</span>
+          </div>
+        </div>
+        <div class="field" id="roleFieldWrap">
+          <label>Nível de acesso</label>
+          <div class="role-select">
+            <div class="role-option is-admin" data-role="admin">
+              <div class="r-title">Administrador</div><div class="r-desc">Acesso total ao sistema</div>
+            </div>
+            <div class="role-option selected" data-role="operador">
+              <div class="r-title">Operador</div><div class="r-desc">Acesso restrito ao PDV</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelUserModal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="saveUserBtn">Salvar usuário</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: SANGRIA DE CAIXA (com autorização de admin)
+============================================================= -->
+<div class="modal-overlay" id="sangriaModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>💸 Sangria de caixa</h3>
+      <button class="modal-close" id="closeSangriaModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="sangriaForm">
+      <div class="modal-body">
+        <div id="sangriaError" class="auth-error hidden"></div>
+        <div class="field">
+          <label>Valor da sangria (R$)</label>
+          <input type="number" class="input" id="sangriaValor" min="0.01" step="0.01" placeholder="0,00" required>
+        </div>
+        <div class="field">
+          <label>Motivo</label>
+          <input type="text" class="input" id="sangriaMotivo" placeholder="Ex: pagamento de fornecedor" required>
+        </div>
+        <div class="pdv-divider"></div>
+        <p class="hint" style="display:block; margin-bottom:14px;">Autorização exigida: informe as credenciais de um administrador cadastrado.</p>
+        <div class="row-2">
+          <div class="field"><label>Usuário admin</label><input type="text" class="input" id="sangriaAdminUser" placeholder="usuario.admin" required></div>
+          <div class="field"><label>Senha admin</label><input type="password" class="input" id="sangriaAdminPass" placeholder="••••••••" required></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelSangriaModal">Cancelar</button>
+        <button type="submit" class="btn btn-coral-solid">Confirmar sangria</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: SELEÇÃO RÁPIDA DE PAGAMENTO (atalho F10)
+============================================================= -->
+<div class="modal-overlay" id="paymentModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Forma de pagamento <span class="hint">(F10)</span></h3>
+      <button class="modal-close" id="closePaymentModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="payment-method-grid">
+        <button type="button" class="payment-method-option" data-method="dinheiro"><span class="pm-icon">💵</span><span class="pm-title">Dinheiro</span></button>
+        <button type="button" class="payment-method-option" data-method="pix"><span class="pm-icon">⚡</span><span class="pm-title">PIX</span></button>
+        <button type="button" class="payment-method-option" data-method="debito"><span class="pm-icon">💳</span><span class="pm-title">Débito</span></button>
+        <button type="button" class="payment-method-option" data-method="credito"><span class="pm-icon">💳</span><span class="pm-title">Crédito</span></button>
+      </div>
+      <div class="field hidden" id="paymentModalInstallmentsWrap" style="margin-top:18px;">
+        <label>Parcelas</label>
+        <select class="input" id="paymentModalInstallments"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" id="cancelPaymentModal">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="confirmPaymentModalBtn">Confirmar forma de pagamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: NOVO / EDITAR PRODUTO
+============================================================= -->
+<div class="modal-overlay" id="productModalOverlay">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-head">
+      <h3 id="productModalTitle">Novo produto</h3>
+      <button class="modal-close" id="closeProductModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="productForm">
+      <div class="modal-body">
+        <input type="hidden" id="productFormId">
+        <div class="row-2">
+          <div class="field"><label>Código</label><input type="text" class="input" id="productFormCode" placeholder="Ex: 0001" required></div>
+          <div class="field"><label>Categoria</label><select class="input" id="productFormCategory" required></select></div>
+        </div>
+        <div class="field"><label>Nome do produto</label><input type="text" class="input" id="productFormName" placeholder="Ex: Refrigerante 350ml" required></div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Preço de Custo (R$) <span class="hint">(opcional)</span></label>
+            <input type="number" class="input" id="productFormCostPrice" min="0" step="0.01" placeholder="0,00">
+          </div>
+          <div class="field">
+            <label>Margem de Lucro Desejada (%) <span class="hint">(opcional)</span></label>
+            <input type="number" class="input" id="productFormMarginPercent" min="0" max="99" step="0.1" placeholder="Ex: 40">
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Preço de venda (R$)</label><input type="number" class="input" id="productFormPrice" min="0" step="0.01" placeholder="0,00" required></div>
+          <div class="field"><label>Estoque mínimo</label><input type="number" class="input" id="productFormMinStock" min="0" step="1" placeholder="0" required></div>
+        </div>
+        <span class="hint" id="productCostFallbackHint" style="display:block; margin:-8px 0 16px;">
+          Informe Custo + Margem para calcular o Preço de venda automaticamente, ou digite o Preço de venda direto para recalcular a Margem. Se o custo ficar em branco, os relatórios estimam 70% do preço de venda até você informar o valor real.
+        </span>
+        <div class="row-2">
+          <div class="field" id="productInitialStockField"><label>Estoque inicial</label><input type="number" class="input" id="productFormInitialStock" min="0" step="1" value="0"></div>
+          <div class="field hidden" id="productEntryStockField"><label>Adicionar entrada <span class="hint">(opcional)</span></label><input type="number" class="input" id="productFormEntryStock" min="0" step="1" value="0"></div>
+        </div>
+        <div class="field hidden" id="productCurrentStockDisplay"><label>Saldo atual</label><div class="stock-readonly" id="productCurrentStockValue">0 unidades</div></div>
+        <div class="toggle-row">
+          <label class="switch"><input type="checkbox" id="productFormActive" checked><span class="slider"></span></label>
+          <div><div class="toggle-title">Produto ativo</div><div class="toggle-desc">Produtos inativos não aparecem no PDV.</div></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelProductModal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="saveProductBtn">Salvar produto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: GERENCIAR CATEGORIAS
+============================================================= -->
+<div class="modal-overlay" id="categoryModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Gerenciar categorias</h3>
+      <button class="modal-close" id="closeCategoryModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:18px;">
+        <label>Nova categoria</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" class="input" id="newCategoryName" placeholder="Ex: Bebidas">
+          <button class="btn btn-primary btn-sm" id="addCategoryBtn">Adicionar</button>
+        </div>
+      </div>
+      <div id="categoryListWrap"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" id="closeCategoryModalBtn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: NOVO / EDITAR CLIENTE
+============================================================= -->
+<div class="modal-overlay" id="customerModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="customerModalTitle">Novo cliente</h3>
+      <button class="modal-close" id="closeCustomerModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="customerForm">
+      <div class="modal-body">
+        <input type="hidden" id="customerFormId">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" class="input" id="customerFormName" placeholder="Ex: Ana Souza" required>
+        </div>
+        <div class="field">
+          <label>CPF</label>
+          <input type="text" class="input" id="customerFormCpf" placeholder="000.000.000-00" required maxlength="14">
+          <span class="hint">Usado para localizar o cliente rapidamente no PDV.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelCustomerModal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="saveCustomerBtn">Salvar cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: HISTÓRICO DE COMPRAS DO CLIENTE
+============================================================= -->
+<div class="modal-overlay" id="customerHistoryModalOverlay">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-head">
+      <h3 id="customerHistoryTitle">Histórico de compras</h3>
+      <button class="modal-close" id="closeCustomerHistoryModal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" id="customerHistorySubtitle" style="display:block; margin-bottom:14px;">CPF: — · Total gasto: —</p>
+      <div id="customerHistoryList"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" id="closeCustomerHistoryModalBtn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   FLUXOLOG — CORE APP
+============================================================================ */
+const STORAGE_KEY = 'fluxolog_state_v1';
+const THEME_KEY = 'fluxolog_theme';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+/* --------------------------------------------------------------------------
+   TEMA CLARO / ESCURO
+-------------------------------------------------------------------------- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggleIcon').textContent = theme === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem(THEME_KEY, theme);
+  try{ renderStockChart(); }catch(e){ /* gráfico pode não existir ainda */ }
+}
+
+function initTheme(){
+  const saved = localStorage.getItem(THEME_KEY);
+  if(saved){
+    applyTheme(saved);
+  }else{
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+}
+
+document.getElementById('themeToggleBtn').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+function getThemeColor(varName, fallback){
+  const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return val || fallback;
+}
+
+/* --------------------------------------------------------------------------
+   ESTADO GLOBAL + PERSISTÊNCIA
+-------------------------------------------------------------------------- */
+const DEFAULT_STATE = { products: [], categories: [], sales: [], users: [], customers: [] };
+let state = loadState();
+let session = { currentUser: null };
+let cart = []; // { productId, name, code, qty, unitPrice }
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return { ...structuredClone(DEFAULT_STATE), ...parsed };
+  }catch(e){
+    console.error('Erro ao carregar estado do FluxoLog:', e);
+    return structuredClone(DEFAULT_STATE);
+  }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function ensureDefaultCategory(){
+  const hasVendas = state.categories.some(c => c.name.toLowerCase() === 'vendas');
+  if(!hasVendas){
+    state.categories.push({ id: uid(), name: 'Vendas' });
+    saveState();
+  }
+}
+
+function fmtMoney(v){
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/* --------------------------------------------------------------------------
+   TOASTS
+-------------------------------------------------------------------------- */
+function showToast(message, type = 'default'){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  wrap.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(30px)';
+    el.style.transition = 'all .25s ease';
+    setTimeout(() => el.remove(), 260);
+  }, 2600);
+}
+
+/* --------------------------------------------------------------------------
+   AUTENTICAÇÃO
+-------------------------------------------------------------------------- */
+function initAuthScreen(){
+  const setupView = document.getElementById('setupView');
+  const loginView = document.getElementById('loginView');
+  if(state.users.length === 0){
+    setupView.classList.remove('hidden');
+    loginView.classList.add('hidden');
+  }else{
+    setupView.classList.add('hidden');
+    loginView.classList.remove('hidden');
+  }
+}
+
+document.getElementById('setupForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('setupName').value.trim();
+  const username = document.getElementById('setupUsername').value.trim();
+  const password = document.getElementById('setupPassword').value;
+  const errBox = document.getElementById('setupError');
+
+  if(!name || !username || !password){
+    errBox.textContent = 'Preencha todos os campos para continuar.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+  const adminUser = { id: uid(), name, username, password, role: 'admin' };
+  state.users.push(adminUser);
+  saveState();
+  showToast('Conta de administrador criada com sucesso!', 'success');
+  loginSuccess(adminUser);
+});
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+
+  const found = state.users.find(u => u.username === username && u.password === password);
+  if(!found){
+    errBox.textContent = 'Usuário ou senha incorretos. Tente novamente.';
+    errBox.classList.remove('hidden');
+    const card = document.getElementById('authCard');
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = 'shake .35s ease';
+    return;
+  }
+  errBox.classList.add('hidden');
+  loginSuccess(found);
+});
+
+function loginSuccess(user){
+  session.currentUser = user;
+  const authScreen = document.getElementById('authScreen');
+  const appShell = document.getElementById('appShell');
+
+  authScreen.style.transition = 'opacity .4s ease';
+  authScreen.style.opacity = '0';
+  setTimeout(() => {
+    authScreen.classList.add('hidden');
+    appShell.classList.remove('hidden');
+    renderHeaderUser();
+    applyRolePermissions();
+    renderUsersTable();
+    renderProductsTable();
+    renderEstoqueIndicators();
+    renderCustomersTable();
+    populatePaymentModalInstallments();
+    populateInstallmentsSelect();
+    renderCart();
+    document.getElementById('pdvBarcodeInput')?.focus();
+  }, 380);
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  session.currentUser = null;
+  document.getElementById('appShell').classList.add('hidden');
+  const authScreen = document.getElementById('authScreen');
+  authScreen.classList.remove('hidden');
+  authScreen.style.opacity = '1';
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').classList.add('hidden');
+  initAuthScreen();
+  showToast('Sessão encerrada.');
+});
+
+/* --------------------------------------------------------------------------
+   HEADER / PERMISSÕES POR PERFIL
+-------------------------------------------------------------------------- */
+function renderHeaderUser(){
+  const u = session.currentUser;
+  if(!u) return;
+  document.getElementById('headerUserName').textContent = u.name;
+  document.getElementById('headerAvatar').textContent = initials(u.name);
+  const badge = document.getElementById('headerRoleBadge');
+  badge.textContent = u.role === 'admin' ? 'Admin' : 'Equipe';
+  badge.className = 'role-badge ' + (u.role === 'admin' ? 'admin' : 'operador');
+}
+function initials(name){
+  return name.split(' ').filter(Boolean).slice(0,2).map(n => n[0].toUpperCase()).join('');
+}
+
+function applyRolePermissions(){
+  const isAdmin = session.currentUser?.role === 'admin';
+  document.querySelectorAll('[data-role="admin"]').forEach(el => el.classList.toggle('hidden', !isAdmin));
+
+  const activeBtn = document.querySelector('.nav-item.active');
+  if(activeBtn && activeBtn.hasAttribute('data-role') && !isAdmin){
+    switchTab('pdv');
+  }
+
+  document.getElementById('relatoriosOperatorView').classList.toggle('hidden', isAdmin);
+  document.getElementById('relatoriosAdminView').classList.toggle('hidden', !isAdmin);
+  document.getElementById('reportResults').classList.add('hidden');
+  document.getElementById('reportEmptyState').classList.remove('hidden');
+  document.getElementById('profitAnalysisWrap').classList.add('hidden');
+}
+
+/* --------------------------------------------------------------------------
+   NAVEGAÇÃO ENTRE ABAS
+-------------------------------------------------------------------------- */
+const TAB_META = {
+  pdv: { title: 'PDV — Frente de Caixa', subtitle: 'Registre vendas e sangrias em tempo real' },
+  estoque: { title: 'Inventário & Estoque', subtitle: 'Controle de produtos, categorias e níveis mínimos' },
+  relatorios: { title: 'Relatórios', subtitle: 'Acompanhe o desempenho comercial' },
+  clientes: { title: 'Clientes', subtitle: 'Identifique clientes e analise o histórico de compras' },
+  usuarios: { title: 'Usuários', subtitle: 'Gerencie contas e permissões de acesso' },
+};
+
+function switchTab(tab){
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `tab-${tab}`));
+  document.getElementById('topbarTitle').textContent = TAB_META[tab].title;
+  document.getElementById('topbarSubtitle').textContent = TAB_META[tab].subtitle;
+
+  if(tab === 'estoque'){
+    renderProductsTable();
+    renderEstoqueIndicators();
+  }
+  if(tab === 'clientes'){
+    renderCustomersTable();
+  }
+  if(tab === 'pdv'){
+    setTimeout(() => document.getElementById('pdvBarcodeInput')?.focus(), 50);
+  }
+  if(window.innerWidth <= 900){
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+
+/* --------------------------------------------------------------------------
+   GERENCIAMENTO DE USUÁRIOS (ADMIN)
+-------------------------------------------------------------------------- */
+let userModalMode = 'create';
+const userModalOverlay = document.getElementById('userModalOverlay');
+const userForm = document.getElementById('userForm');
+
+function openUserModal(mode, userData = null){
+  userModalMode = mode;
+  const title = document.getElementById('userModalTitle');
+  const passHint = document.getElementById('passwordEditHint');
+  const passInput = document.getElementById('userFormPassword');
+  const roleWrap = document.getElementById('roleFieldWrap');
+
+  userForm.reset();
+  document.getElementById('userFormId').value = '';
+  selectRoleOption('operador');
+
+  if(mode === 'create'){
+    title.textContent = 'Novo usuário';
+    passHint.style.display = 'none';
+    passInput.required = true;
+    roleWrap.style.display = '';
+  }else if(mode === 'edit'){
+    title.textContent = 'Editar usuário';
+    passHint.style.display = 'inline';
+    passInput.required = false;
+    roleWrap.style.display = '';
+    fillUserForm(userData);
+  }else if(mode === 'self'){
+    title.textContent = 'Editar meu perfil';
+    passHint.style.display = 'inline';
+    passInput.required = false;
+    roleWrap.style.display = 'none';
+    fillUserForm(userData);
+  }
+  userModalOverlay.classList.add('show');
+}
+function fillUserForm(userData){
+  document.getElementById('userFormId').value = userData.id;
+  document.getElementById('userFormName').value = userData.name;
+  document.getElementById('userFormUsername').value = userData.username;
+  selectRoleOption(userData.role);
+}
+function closeUserModal(){ userModalOverlay.classList.remove('show'); }
+
+document.getElementById('openNewUserModal').addEventListener('click', () => openUserModal('create'));
+document.getElementById('closeUserModal').addEventListener('click', closeUserModal);
+document.getElementById('cancelUserModal').addEventListener('click', closeUserModal);
+userModalOverlay.addEventListener('click', (e) => { if(e.target === userModalOverlay) closeUserModal(); });
+
+document.querySelectorAll('.role-option').forEach(opt => opt.addEventListener('click', () => selectRoleOption(opt.dataset.role)));
+function selectRoleOption(role){
+  document.querySelectorAll('.role-option').forEach(opt => opt.classList.toggle('selected', opt.dataset.role === role));
+}
+function getSelectedRole(){ return document.querySelector('.role-option.selected').dataset.role; }
+
+userForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('userFormId').value;
+  const name = document.getElementById('userFormName').value.trim();
+  const username = document.getElementById('userFormUsername').value.trim();
+  const password = document.getElementById('userFormPassword').value;
+  const role = userModalMode === 'self' ? session.currentUser.role : getSelectedRole();
+
+  const duplicated = state.users.some(u => u.username === username && u.id !== id);
+  if(duplicated){ showToast('Esse nome de usuário já está em uso.', 'error'); return; }
+
+  if(userModalMode === 'create'){
+    state.users.push({ id: uid(), name, username, password, role });
+    showToast('Usuário criado com sucesso!', 'success');
+  }else{
+    const target = state.users.find(u => u.id === id);
+    target.name = name;
+    target.username = username;
+    if(password) target.password = password;
+    if(userModalMode === 'edit') target.role = role;
+    if(userModalMode === 'self'){
+      session.currentUser = target;
+      renderHeaderUser();
+    }
+    showToast('Dados atualizados com sucesso!', 'success');
+  }
+
+  saveState();
+  renderUsersTable();
+  closeUserModal();
+});
+
+function renderUsersTable(){
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = '';
+  if(state.users.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhum usuário cadastrado.</td></tr>`;
+    return;
+  }
+  state.users.forEach(u => {
+    const isSelf = session.currentUser && u.id === session.currentUser.id;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="u-cell">
+          <div class="u-avatar">${initials(u.name)}</div>
+          <div><div class="u-name-row">${u.name} ${isSelf ? '<span style="color:var(--emerald-600); font-weight:700;">(você)</span>' : ''}</div></div>
+        </div>
+      </td>
+      <td><span class="u-username-row">@${u.username}</span></td>
+      <td><span class="role-badge ${u.role}">${u.role === 'admin' ? 'Admin' : 'Operador'}</span></td>
+      <td>
+        <div class="table-actions">
+          ${isSelf
+            ? `<button class="btn btn-ghost btn-sm" data-action="self" data-id="${u.id}">Editar meu perfil</button>`
+            : `<button class="btn btn-ghost btn-sm" data-action="edit" data-id="${u.id}">Editar</button>
+               <button class="btn btn-coral btn-sm" data-action="delete" data-id="${u.id}">Remover</button>`
+          }
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-action="edit"]').forEach(btn => btn.addEventListener('click', () => openUserModal('edit', state.users.find(x => x.id === btn.dataset.id))));
+  tbody.querySelectorAll('[data-action="self"]').forEach(btn => btn.addEventListener('click', () => openUserModal('self', state.users.find(x => x.id === btn.dataset.id))));
+  tbody.querySelectorAll('[data-action="delete"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const u = state.users.find(x => x.id === btn.dataset.id);
+      if(confirm(`Remover o usuário "${u.name}"? Essa ação não pode ser desfeita.`)){
+        state.users = state.users.filter(x => x.id !== u.id);
+        saveState();
+        renderUsersTable();
+        showToast('Usuário removido.', 'success');
+      }
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   BACKUP E RESTAURAÇÃO
+-------------------------------------------------------------------------- */
+function isValidBackup(obj){
+  if(!obj || typeof obj !== 'object') return false;
+  return ['products', 'categories', 'sales', 'users'].every(key => Array.isArray(obj[key]));
+}
+
+document.getElementById('exportBackupBtn').addEventListener('click', () => {
+  try{
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup_fluxolog.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Backup exportado com sucesso!', 'success');
+  }catch(err){
+    console.error('Erro ao exportar backup:', err);
+    showToast('Não foi possível exportar o backup.', 'error');
+  }
+});
+
+document.getElementById('restoreBackupBtn').addEventListener('click', () => document.getElementById('restoreBackupInput').click());
+
+document.getElementById('restoreBackupInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+
+  reader.onload = (evt) => {
+    let parsed;
+    try{ parsed = JSON.parse(evt.target.result); }
+    catch(err){ showToast('Arquivo inválido: não é um JSON legível.', 'error'); e.target.value = ''; return; }
+
+    if(!isValidBackup(parsed)){
+      showToast('Arquivo inválido: esse não é um backup reconhecido do FluxoLog.', 'error');
+      e.target.value = '';
+      return;
+    }
+    const confirmed = confirm('Restaurar este backup vai substituir TODOS os dados atuais (produtos, categorias, vendas e usuários). Essa ação não pode ser desfeita. Deseja continuar?');
+    if(!confirmed){ e.target.value = ''; return; }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    showToast('Backup restaurado! Recarregando o sistema...', 'success');
+    setTimeout(() => window.location.reload(), 900);
+  };
+  reader.onerror = () => { showToast('Erro ao ler o arquivo selecionado.', 'error'); e.target.value = ''; };
+  reader.readAsText(file);
+});
+
+/* --------------------------------------------------------------------------
+   PDV — CARRINHO, BIPAGEM E FINALIZAÇÃO DE VENDA
+-------------------------------------------------------------------------- */
+function findProductByBarcode(code){
+  return state.products.find(p => p.code === code && p.active !== false);
+}
+
+function addProductToCart(product, qty = 1, unitPrice = null){
+  const price = unitPrice !== null ? unitPrice : product.price;
+  const existing = cart.find(item => item.productId === product.id && item.unitPrice === price);
+  if(existing){ existing.qty += qty; }
+  else{ cart.push({ productId: product.id, name: product.name, code: product.code, qty, unitPrice: price }); }
+  renderCart();
+}
+
+function handleBarcodeSubmit(){
+  const input = document.getElementById('pdvBarcodeInput');
+  const hint = document.getElementById('pdvBarcodeHint');
+  const qtyField = document.getElementById('pdvQtyOverride');
+  const code = input.value.trim();
+  if(!code) return;
+
+  const product = findProductByBarcode(code);
+  if(!product){
+    showToast(`Nenhum produto ativo encontrado com o código "${code}".`, 'error');
+    hint.textContent = `Código "${code}" não encontrado. Tente novamente.`;
+    input.value = '';
+    input.focus();
+    return;
+  }
+
+  const qty = parseInt(qtyField.value, 10) || 1;
+  const isCritical = (product.stock ?? 0) <= product.minStock;
+
+  addProductToCart(product, qty);
+  showToast(
+    `${product.name} adicionado ao carrinho${qty > 1 ? ` (${qty}x)` : ''}.${isCritical ? ' Atenção: estoque crítico!' : ''}`,
+    isCritical ? 'error' : 'success'
+  );
+  hint.innerHTML = `Último item: ${product.name} · ${fmtMoney(product.price)}${qty > 1 ? ` × ${qty}` : ''} ${isCritical ? '<span class="badge-critical-stock">Estoque Crítico</span>' : ''}`;
+
+  input.value = '';
+  qtyField.value = 1;
+  input.focus();
+}
+
+document.getElementById('pdvBarcodeInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){ e.preventDefault(); handleBarcodeSubmit(); }
+});
+document.getElementById('pdvQtyOverride').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('pdvBarcodeInput').focus(); }
+});
+
+function renderCart(){
+  const tbody = document.getElementById('pdvCartBody');
+  tbody.innerHTML = '';
+
+  if(cart.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Nenhum item adicionado ainda.</td></tr>`;
+  }else{
+    cart.forEach((item, idx) => {
+      const subtotal = item.qty * item.unitPrice;
+      const product = state.products.find(p => p.id === item.productId);
+      const isCritical = product && (product.stock ?? 0) <= product.minStock;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="cart-product-name">${item.name} ${isCritical ? '<span class="badge-critical-stock">Estoque Crítico</span>' : ''}</div>
+          <div class="cart-product-code">Código ${item.code}</div>
+        </td>
+        <td><input type="number" class="cart-inline-input" data-idx="${idx}" data-field="qty" value="${item.qty}" min="1" step="1"></td>
+        <td><input type="number" class="cart-inline-input" data-idx="${idx}" data-field="unitPrice" value="${item.unitPrice}" min="0" step="0.01"></td>
+        <td><strong>${fmtMoney(subtotal)}</strong></td>
+        <td>
+          <button class="cart-remove-btn" data-idx="${idx}" title="Remover item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  tbody.querySelectorAll('.cart-remove-btn').forEach(btn => btn.addEventListener('click', () => { cart.splice(parseInt(btn.dataset.idx, 10), 1); renderCart(); }));
+  tbody.querySelectorAll('.cart-inline-input').forEach(input => {
+    input.addEventListener('change', () => {
+      const idx = parseInt(input.dataset.idx, 10);
+      const field = input.dataset.field;
+      const value = parseFloat(input.value);
+      if(isNaN(value) || value <= 0){ showToast('Informe um valor válido.', 'error'); renderCart(); return; }
+      if(field === 'qty') cart[idx].qty = Math.round(value);
+      else cart[idx].unitPrice = value;
+      renderCart();
+    });
+  });
+
+  const total = cart.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+  document.getElementById('pdvTotalValue').textContent = fmtMoney(total);
+  const itemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById('pdvItemCount').textContent = `${itemsCount} ${itemsCount === 1 ? 'item' : 'itens'} no carrinho`;
+}
+
+function populateInstallmentsSelect(){
+  const select = document.getElementById('pdvInstallments');
+  select.innerHTML = '';
+  for(let i = 1; i <= 12; i++){
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i === 1 ? 'À vista (1x)' : `${i}x`;
+    select.appendChild(opt);
+  }
+}
+
+document.getElementById('pdvPaymentMethod').addEventListener('change', (e) => {
+  document.getElementById('pdvInstallmentsWrap').classList.toggle('hidden', e.target.value !== 'credito');
+});
+
+document.getElementById('pdvFinalizeBtn').addEventListener('click', () => {
+  if(cart.length === 0){ showToast('Adicione ao menos um item ao carrinho antes de finalizar.', 'error'); return; }
+
+  const insufficient = [];
+  cart.forEach(item => {
+    const product = state.products.find(p => p.id === item.productId);
+    const availableStock = product?.stock ?? 0;
+    if(!product || availableStock < item.qty){
+      insufficient.push(`${item.name} (disponível: ${availableStock}, solicitado: ${item.qty})`);
+    }
+  });
+  if(insufficient.length > 0){
+    showToast(`Estoque insuficiente: ${insufficient.join(', ')}`, 'error');
+    return;
+  }
+
+  cart.forEach(item => {
+    const product = state.products.find(p => p.id === item.productId);
+    product.stock = (product.stock ?? 0) - item.qty;
+  });
+
+  const paymentMethod = document.getElementById('pdvPaymentMethod').value;
+  const installments = paymentMethod === 'credito' ? parseInt(document.getElementById('pdvInstallments').value, 10) : 1;
+  const obs = document.getElementById('pdvObs').value.trim();
+  const total = cart.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+
+  const identifiedCustomer = selectedCustomerId ? state.customers.find(c => c.id === selectedCustomerId) : null;
+
+  const sale = {
+    id: uid(),
+    date: new Date().toISOString(),
+    userId: session.currentUser.id,
+    userName: session.currentUser.name,
+    authAdminName: null,
+    customerId: identifiedCustomer ? identifiedCustomer.id : null,
+    customerName: identifiedCustomer ? identifiedCustomer.name : 'Consumidor Geral',
+    products: cart.map(item => ({ productId: item.productId, qty: item.qty, unitPrice: item.unitPrice })),
+    paymentMethod, installments, totalValue: total, type: 'venda', obs
+  };
+
+  state.sales.push(sale);
+
+  // Acumula o histórico de compras no cadastro do cliente (perfil de consumo)
+  if(identifiedCustomer){
+    if(!Array.isArray(identifiedCustomer.purchases)) identifiedCustomer.purchases = [];
+    identifiedCustomer.purchases.push({
+      saleId: sale.id,
+      date: sale.date,
+      products: cart.map(item => ({ productId: item.productId, name: item.name, qty: item.qty, unitPrice: item.unitPrice })),
+      totalValue: total
+    });
+  }
+
+  saveState();
+
+  cart = [];
+  renderCart();
+  renderProductsTable();
+  renderEstoqueIndicators();
+  renderCustomersTable();
+  clearCustomerSelection();
+  document.getElementById('pdvObs').value = '';
+  document.getElementById('pdvPaymentMethod').value = 'dinheiro';
+  document.getElementById('pdvInstallmentsWrap').classList.add('hidden');
+
+  showToast(`Venda de ${fmtMoney(total)} registrada para ${sale.customerName}.`, 'success');
+  document.getElementById('pdvBarcodeInput').focus();
+});
+
+/* --------------------------------------------------------------------------
+   SANGRIA DE CAIXA (com autorização de administrador)
+-------------------------------------------------------------------------- */
+const sangriaModalOverlay = document.getElementById('sangriaModalOverlay');
+
+document.getElementById('pdvSangriaBtn').addEventListener('click', () => {
+  document.getElementById('sangriaForm').reset();
+  document.getElementById('sangriaError').classList.add('hidden');
+  sangriaModalOverlay.classList.add('show');
+});
+function closeSangriaModal(){ sangriaModalOverlay.classList.remove('show'); }
+document.getElementById('closeSangriaModal').addEventListener('click', closeSangriaModal);
+document.getElementById('cancelSangriaModal').addEventListener('click', closeSangriaModal);
+sangriaModalOverlay.addEventListener('click', (e) => { if(e.target === sangriaModalOverlay) closeSangriaModal(); });
+
+document.getElementById('sangriaForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const valor = parseFloat(document.getElementById('sangriaValor').value);
+  const motivo = document.getElementById('sangriaMotivo').value.trim();
+  const adminUser = document.getElementById('sangriaAdminUser').value.trim();
+  const adminPass = document.getElementById('sangriaAdminPass').value;
+  const errBox = document.getElementById('sangriaError');
+
+  if(!valor || valor <= 0 || !motivo){
+    errBox.textContent = 'Preencha o valor e o motivo da sangria.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+  const admin = state.users.find(u => u.username === adminUser && u.password === adminPass && u.role === 'admin');
+  if(!admin){
+    errBox.textContent = 'Credenciais de administrador inválidas. A sangria não foi autorizada.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  const sangria = {
+    id: uid(), date: new Date().toISOString(),
+    userId: session.currentUser.id, userName: session.currentUser.name,
+    authAdminName: admin.name, products: [], paymentMethod: null, installments: null,
+    totalValue: valor, type: 'sangria', obs: motivo
+  };
+  state.sales.push(sangria);
+  saveState();
+  closeSangriaModal();
+  showToast(`Sangria de ${fmtMoney(valor)} autorizada por ${admin.name}.`, 'success');
+});
+
+/* --------------------------------------------------------------------------
+   MODAL DE PAGAMENTO RÁPIDO (atalho F10)
+-------------------------------------------------------------------------- */
+let selectedPaymentMethod = 'dinheiro';
+const paymentModalOverlay = document.getElementById('paymentModalOverlay');
+
+function populatePaymentModalInstallments(){
+  const select = document.getElementById('paymentModalInstallments');
+  select.innerHTML = '';
+  for(let i = 1; i <= 12; i++){
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i === 1 ? 'À vista (1x)' : `${i}x`;
+    select.appendChild(opt);
+  }
+}
+
+function selectPaymentMethodOption(method){
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.payment-method-option').forEach(btn => btn.classList.toggle('selected', btn.dataset.method === method));
+  document.getElementById('paymentModalInstallmentsWrap').classList.toggle('hidden', method !== 'credito');
+}
+
+function openPaymentModal(){
+  const currentMethod = document.getElementById('pdvPaymentMethod').value || 'dinheiro';
+  selectPaymentMethodOption(currentMethod);
+  const currentInstallments = document.getElementById('pdvInstallments').value;
+  if(currentInstallments) document.getElementById('paymentModalInstallments').value = currentInstallments;
+  paymentModalOverlay.classList.add('show');
+}
+
+document.querySelectorAll('.payment-method-option').forEach(btn => btn.addEventListener('click', () => selectPaymentMethodOption(btn.dataset.method)));
+document.getElementById('openPaymentModalBtn').addEventListener('click', openPaymentModal);
+document.getElementById('closePaymentModal').addEventListener('click', () => paymentModalOverlay.classList.remove('show'));
+document.getElementById('cancelPaymentModal').addEventListener('click', () => paymentModalOverlay.classList.remove('show'));
+paymentModalOverlay.addEventListener('click', (e) => { if(e.target === paymentModalOverlay) paymentModalOverlay.classList.remove('show'); });
+
+document.getElementById('confirmPaymentModalBtn').addEventListener('click', () => {
+  const pdvSelect = document.getElementById('pdvPaymentMethod');
+  pdvSelect.value = selectedPaymentMethod;
+  pdvSelect.dispatchEvent(new Event('change'));
+  if(selectedPaymentMethod === 'credito'){
+    document.getElementById('pdvInstallments').value = document.getElementById('paymentModalInstallments').value;
+  }
+  paymentModalOverlay.classList.remove('show');
+  showToast(`Forma de pagamento definida: ${PAYMENT_LABELS[selectedPaymentMethod]}.`, 'success');
+  document.getElementById('pdvBarcodeInput').focus();
+});
+
+/* --------------------------------------------------------------------------
+   INVENTÁRIO — PRODUTOS, CATEGORIAS, INDICADORES E GRÁFICO
+-------------------------------------------------------------------------- */
+function getCategoryName(id){
+  const cat = state.categories.find(c => c.id === id);
+  return cat ? cat.name : '—';
+}
+
+function populateProductCategorySelect(){
+  const select = document.getElementById('productFormCategory');
+  select.innerHTML = '';
+  state.categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    select.appendChild(opt);
+  });
+}
+
+// Cálculo bidirecional: Custo + Margem% define o Preço de Venda; editar o Preço de
+// Venda manualmente recalcula a Margem% correspondente. Nenhuma chamada assíncrona
+// envolvida — tudo síncrono para não travar a tela nem arriscar o LocalStorage.
+function computeVendaFromCustoMargem(custo, margemPercent){
+  if(isNaN(custo) || custo < 0 || isNaN(margemPercent)) return null;
+  const margem = Math.min(Math.max(margemPercent, 0), 99); // trava entre 0% e 99% para evitar divisão por zero/negativo
+  const venda = custo / (1 - margem / 100);
+  return isFinite(venda) ? venda : null;
+}
+function computeMargemFromCustoVenda(custo, venda){
+  if(isNaN(venda) || venda <= 0 || isNaN(custo)) return 0;
+  return ((venda - custo) / venda) * 100;
+}
+
+function handleCostOrMarginInput(){
+  const cost = parseFloat(document.getElementById('productFormCostPrice').value);
+  const margin = parseFloat(document.getElementById('productFormMarginPercent').value);
+  if(isNaN(cost) || cost < 0 || isNaN(margin)) return;
+  const venda = computeVendaFromCustoMargem(cost, margin);
+  if(venda !== null && venda >= 0){
+    document.getElementById('productFormPrice').value = venda.toFixed(2);
+  }
+}
+function handlePriceInput(){
+  const cost = parseFloat(document.getElementById('productFormCostPrice').value);
+  const venda = parseFloat(document.getElementById('productFormPrice').value);
+  if(isNaN(cost) || cost < 0 || isNaN(venda) || venda <= 0) return;
+  const margin = computeMargemFromCustoVenda(cost, venda);
+  document.getElementById('productFormMarginPercent').value = margin.toFixed(2);
+}
+
+document.getElementById('productFormCostPrice').addEventListener('input', handleCostOrMarginInput);
+document.getElementById('productFormMarginPercent').addEventListener('input', handleCostOrMarginInput);
+document.getElementById('productFormPrice').addEventListener('input', handlePriceInput);
+
+let productModalMode = 'create';
+const productModalOverlay = document.getElementById('productModalOverlay');
+
+function openProductModal(mode, product = null){
+  productModalMode = mode;
+  populateProductCategorySelect();
+
+  const form = document.getElementById('productForm');
+  form.reset();
+  document.getElementById('productFormId').value = '';
+  document.getElementById('productFormActive').checked = true;
+
+  const initialField = document.getElementById('productInitialStockField');
+  const entryField = document.getElementById('productEntryStockField');
+  const currentDisplay = document.getElementById('productCurrentStockDisplay');
+
+  if(mode === 'create'){
+    document.getElementById('productModalTitle').textContent = 'Novo produto';
+    initialField.classList.remove('hidden');
+    entryField.classList.add('hidden');
+    currentDisplay.classList.add('hidden');
+  }else{
+    document.getElementById('productModalTitle').textContent = 'Editar produto';
+    initialField.classList.add('hidden');
+    entryField.classList.remove('hidden');
+    currentDisplay.classList.remove('hidden');
+    document.getElementById('productFormId').value = product.id;
+    document.getElementById('productFormCode').value = product.code;
+    document.getElementById('productFormCategory').value = product.categoryId;
+    document.getElementById('productFormName').value = product.name;
+    document.getElementById('productFormPrice').value = product.price;
+    document.getElementById('productFormMinStock').value = product.minStock;
+    document.getElementById('productFormCostPrice').value = (product.costPrice !== null && product.costPrice !== undefined) ? product.costPrice : '';
+    document.getElementById('productFormMarginPercent').value = product.price > 0
+      ? computeMargemFromCustoVenda(getProductCost(product), product.price).toFixed(2)
+      : '';
+    document.getElementById('productFormActive').checked = product.active !== false;
+    document.getElementById('productFormEntryStock').value = 0;
+    document.getElementById('productCurrentStockValue').textContent = `${product.stock ?? 0} unidade(s)`;
+  }
+
+  productModalOverlay.classList.add('show');
+  if(mode === 'create'){
+    setTimeout(() => document.getElementById('productFormCode')?.focus(), 150);
+  }
+}
+function closeProductModal(){ productModalOverlay.classList.remove('show'); }
+
+document.getElementById('openNewProductModal').addEventListener('click', () => openProductModal('create'));
+document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
+document.getElementById('cancelProductModal').addEventListener('click', closeProductModal);
+productModalOverlay.addEventListener('click', (e) => { if(e.target === productModalOverlay) closeProductModal(); });
+
+// Bipagem no cadastro: o leitor "digita" o código e envia Enter — interceptamos
+// esse Enter para mover o foco ao invés de submeter o formulário incompleto.
+document.getElementById('productFormCode').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('productFormName').focus(); }
+});
+
+document.getElementById('productForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('productFormId').value;
+  const code = document.getElementById('productFormCode').value.trim();
+  const categoryId = document.getElementById('productFormCategory').value;
+  const name = document.getElementById('productFormName').value.trim();
+  const price = parseFloat(document.getElementById('productFormPrice').value);
+  const minStock = parseInt(document.getElementById('productFormMinStock').value, 10);
+  const active = document.getElementById('productFormActive').checked;
+  const costPriceRaw = document.getElementById('productFormCostPrice').value;
+  const costPrice = costPriceRaw === '' ? null : parseFloat(costPriceRaw);
+
+  if(!code || !name || isNaN(price) || isNaN(minStock)){
+    showToast('Preencha todos os campos obrigatórios.', 'error');
+    return;
+  }
+  const duplicateCode = state.products.some(p => p.code === code && p.id !== id);
+  if(duplicateCode){
+    showToast('Já existe um produto cadastrado com esse código.', 'error');
+    return;
+  }
+
+  if(productModalMode === 'create'){
+    const initialStock = parseInt(document.getElementById('productFormInitialStock').value, 10) || 0;
+    state.products.push({ id: uid(), code, name, categoryId, price, minStock, active, stock: initialStock, costPrice });
+    showToast('Produto cadastrado com sucesso!', 'success');
+  }else{
+    const product = state.products.find(p => p.id === id);
+    const entryQty = parseInt(document.getElementById('productFormEntryStock').value, 10) || 0;
+    product.code = code;
+    product.name = name;
+    product.categoryId = categoryId;
+    product.price = price;
+    product.minStock = minStock;
+    product.active = active;
+    product.costPrice = costPrice;
+    product.stock = (product.stock ?? 0) + entryQty;
+    showToast('Produto atualizado com sucesso!', 'success');
+  }
+
+  saveState();
+  closeProductModal();
+  renderProductsTable();
+  renderEstoqueIndicators();
+});
+
+function renderProductsTable(){
+  const tbody = document.getElementById('productsTableBody');
+  tbody.innerHTML = '';
+
+  if(state.products.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Nenhum produto cadastrado ainda.</td></tr>`;
+    return;
+  }
+
+  state.products.forEach(p => {
+    const stock = p.stock ?? 0;
+    const isLow = stock <= p.minStock;
+    const isActive = p.active !== false;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.code}</td>
+      <td><strong>${p.name}</strong></td>
+      <td>${getCategoryName(p.categoryId)}</td>
+      <td>${fmtMoney(p.price)}</td>
+      <td>${p.minStock}</td>
+      <td>
+        <span style="font-weight:700; ${isLow ? 'color:var(--coral-600);' : 'color:var(--text-secondary);'}">${stock}</span>
+        ${isLow ? '<span class="stock-alert-badge">baixo</span>' : ''}
+      </td>
+      <td><span class="status-badge ${isActive ? 'active' : 'inactive'}">${isActive ? 'Ativo' : 'Inativo'}</span></td>
+      <td>
+        <div class="table-actions">
+          <button class="btn btn-ghost btn-sm" data-action="edit-product" data-id="${p.id}">Editar</button>
+          <button class="btn btn-ghost btn-sm" data-action="toggle-product" data-id="${p.id}">${isActive ? 'Inativar' : 'Ativar'}</button>
+          <button class="btn btn-icon icon-danger-btn" data-action="delete-product" data-id="${p.id}" title="Excluir produto">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-action="edit-product"]').forEach(btn => btn.addEventListener('click', () => openProductModal('edit', state.products.find(x => x.id === btn.dataset.id))));
+  tbody.querySelectorAll('[data-action="toggle-product"]').forEach(btn => btn.addEventListener('click', () => toggleProductActive(btn.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete-product"]').forEach(btn => btn.addEventListener('click', () => deleteProduct(btn.dataset.id)));
+}
+
+// Ativa/inativa e persiste IMEDIATAMENTE. Produtos inativos somem da bipagem do PDV.
+function toggleProductActive(productId){
+  const product = state.products.find(p => p.id === productId);
+  if(!product) return;
+  product.active = product.active === false ? true : false;
+  saveState();
+  renderProductsTable();
+  renderEstoqueIndicators();
+  showToast(product.active ? `${product.name} foi reativado.` : `${product.name} foi inativado e não aparecerá mais no PDV.`, 'success');
+}
+
+// Exclui definitivamente o produto do array e persiste na hora.
+function deleteProduct(productId){
+  const product = state.products.find(p => p.id === productId);
+  if(!product) return;
+  if(!confirm(`Excluir definitivamente o produto "${product.name}"? Essa ação não pode ser desfeita.`)) return;
+  state.products = state.products.filter(p => p.id !== productId);
+  saveState();
+  renderProductsTable();
+  renderEstoqueIndicators();
+  showToast(`Produto "${product.name}" excluído definitivamente.`, 'success');
+}
+
+/* -- Categorias -- */
+const categoryModalOverlay = document.getElementById('categoryModalOverlay');
+
+document.getElementById('openCategoryModalBtn').addEventListener('click', () => { renderCategoryList(); categoryModalOverlay.classList.add('show'); });
+function closeCategoryModal(){ categoryModalOverlay.classList.remove('show'); }
+document.getElementById('closeCategoryModal').addEventListener('click', closeCategoryModal);
+document.getElementById('closeCategoryModalBtn').addEventListener('click', closeCategoryModal);
+categoryModalOverlay.addEventListener('click', (e) => { if(e.target === categoryModalOverlay) closeCategoryModal(); });
+
+document.getElementById('addCategoryBtn').addEventListener('click', () => {
+  const input = document.getElementById('newCategoryName');
+  const name = input.value.trim();
+  if(!name){ showToast('Informe um nome para a categoria.', 'error'); return; }
+  const exists = state.categories.some(c => c.name.toLowerCase() === name.toLowerCase());
+  if(exists){ showToast('Essa categoria já existe.', 'error'); return; }
+  state.categories.push({ id: uid(), name });
+  saveState();
+  input.value = '';
+  renderCategoryList();
+  populateProductCategorySelect();
+  showToast('Categoria criada com sucesso!', 'success');
+});
+
+function renderCategoryList(){
+  const wrap = document.getElementById('categoryListWrap');
+  wrap.innerHTML = '';
+  if(state.categories.length === 0){
+    wrap.innerHTML = `<p class="hint">Nenhuma categoria cadastrada.</p>`;
+    return;
+  }
+  state.categories.forEach(cat => {
+    const inUse = state.products.some(p => p.categoryId === cat.id);
+    const isProtected = inUse || cat.name.toLowerCase() === 'vendas';
+    const row = document.createElement('div');
+    row.className = 'category-row';
+    row.innerHTML = `
+      <span>${cat.name}</span>
+      <button class="btn btn-ghost btn-sm" data-id="${cat.id}" ${isProtected ? 'disabled title="Categoria padrão ou em uso por produtos"' : ''}>Remover</button>
+    `;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('button[data-id]:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.categories = state.categories.filter(c => c.id !== btn.dataset.id);
+      saveState();
+      renderCategoryList();
+      populateProductCategorySelect();
+      showToast('Categoria removida.', 'success');
+    });
+  });
+}
+
+/* -- Indicadores + Gráfico Chart.js -- */
+let stockChartInstance = null;
+
+function renderEstoqueIndicators(){
+  const totalValue = state.products.reduce((sum, p) => sum + (p.stock ?? 0) * p.price, 0);
+  document.getElementById('statTotalStockValue').textContent = fmtMoney(totalValue);
+  document.getElementById('statTotalProducts').textContent = state.products.length;
+  const lowCount = state.products.filter(p => (p.stock ?? 0) <= p.minStock).length;
+  document.getElementById('statLowStock').textContent = lowCount;
+
+  // Markup médio = média de (Preço de Venda / Preço de Custo) de TODOS os produtos cadastrados,
+  // usando o fallback de custo (70% do preço) quando o custo real não foi informado.
+  const markupEl = document.getElementById('statAvgMarkup');
+  const productsWithPrice = state.products.filter(p => p.price > 0);
+  if(productsWithPrice.length === 0){
+    markupEl.textContent = '—';
+  }else{
+    const totalMarkup = productsWithPrice.reduce((sum, p) => {
+      const cost = getProductCost(p);
+      return sum + (cost > 0 ? p.price / cost : 0);
+    }, 0);
+    const avgMarkup = totalMarkup / productsWithPrice.length;
+    markupEl.textContent = `${avgMarkup.toFixed(2)}x`;
+  }
+
+  const banner = document.getElementById('restockAlertBanner');
+  const bannerIcon = document.getElementById('restockAlertIcon');
+  const bannerText = document.getElementById('restockAlertText');
+  if(lowCount > 0){
+    banner.classList.remove('ok');
+    bannerIcon.textContent = '⚠️';
+    bannerText.textContent = `Existem ${lowCount} ${lowCount === 1 ? 'produto precisando' : 'produtos precisando'} de reposição.`;
+  }else{
+    banner.classList.add('ok');
+    bannerIcon.textContent = '✅';
+    bannerText.textContent = 'Estoque em dia — nenhum produto abaixo do mínimo cadastrado.';
+  }
+
+  renderStockChart();
+}
+
+function renderStockChart(){
+  const ctx = document.getElementById('stockCategoryChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+
+  const valuesByCategory = {};
+  state.categories.forEach(cat => { valuesByCategory[cat.name] = 0; });
+  state.products.forEach(p => {
+    const catName = getCategoryName(p.categoryId);
+    valuesByCategory[catName] = (valuesByCategory[catName] || 0) + (p.stock ?? 0) * p.price;
+  });
+
+  const labels = Object.keys(valuesByCategory).filter(k => valuesByCategory[k] > 0);
+  const values = labels.map(l => valuesByCategory[l]);
+  const palette = ['#10b981', '#3b82f6', '#f0b429', '#f43f5e', '#8b5cf6', '#06b6d4', '#f97316', '#64748b'];
+  const legendColor = getThemeColor('--text-secondary', '#475467');
+
+  if(stockChartInstance) stockChartInstance.destroy();
+
+  if(labels.length === 0){
+    stockChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels: ['Sem dados de estoque'], datasets: [{ data: [1], backgroundColor: ['#94a3b8'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '68%' }
+    });
+    return;
+  }
+
+  stockChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 9, padding: 10, font: { family: 'Inter', size: 11 }, color: legendColor } },
+        tooltip: { callbacks: { label: (item) => ` ${item.label}: ${fmtMoney(item.raw)}` } }
+      },
+      cutout: '65%',
+      animation: { animateScale: true }
+    }
+  });
+}
+
+/* --------------------------------------------------------------------------
+   RELATÓRIOS FINANCEIROS E FECHAMENTO DE CAIXA
+-------------------------------------------------------------------------- */
+const PAYMENT_LABELS = { dinheiro: 'Dinheiro', pix: 'PIX', debito: 'Cartão de Débito', credito: 'Cartão de Crédito' };
+let currentReportPeriod = 'diario';
+
+document.querySelectorAll('#relatoriosAdminView .pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#relatoriosAdminView .pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    currentReportPeriod = btn.dataset.period;
+    document.getElementById('customDateRow').classList.toggle('hidden', currentReportPeriod !== 'personalizado');
+  });
+});
+
+document.getElementById('applyReportFilterBtn').addEventListener('click', () => generateReport(currentReportPeriod, false));
+document.getElementById('generateMyReportBtn').addEventListener('click', () => generateReport('diario', true));
+document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+
+function getPeriodRange(period){
+  const now = new Date();
+  let start, end;
+
+  if(period === 'diario'){
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  }else if(period === 'semanal'){
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0);
+  }else if(period === 'mensal'){
+    start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  }else if(period === 'personalizado'){
+    const startVal = document.getElementById('reportDateStart').value;
+    const endVal = document.getElementById('reportDateEnd').value;
+    if(!startVal || !endVal){
+      showToast('Selecione a data inicial e a data final do período.', 'error');
+      return null;
+    }
+    start = new Date(startVal + 'T00:00:00');
+    end = new Date(endVal + 'T23:59:59');
+    if(start > end){
+      showToast('A data inicial não pode ser depois da data final.', 'error');
+      return null;
+    }
+  }
+  return { start, end };
+}
+
+const PERIOD_LABELS = {
+  diario: 'Diário (hoje)', semanal: 'Semanal (últimos 7 dias)', mensal: 'Mensal (mês atual)', personalizado: 'Período personalizado'
+};
+
+function generateReport(period, onlyMine){
+  const range = getPeriodRange(period);
+  if(!range) return;
+
+  let records = state.sales.filter(s => { const d = new Date(s.date); return d >= range.start && d <= range.end; });
+  if(onlyMine) records = records.filter(s => s.userId === session.currentUser.id);
+  records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const grossRevenue = records.filter(s => s.type === 'venda').reduce((sum, s) => sum + s.totalValue, 0);
+  const totalSangrias = records.filter(s => s.type === 'sangria').reduce((sum, s) => sum + s.totalValue, 0);
+  const netBalance = grossRevenue - totalSangrias;
+
+  document.getElementById('reportGrossRevenue').textContent = fmtMoney(grossRevenue);
+  document.getElementById('reportTotalSangrias').textContent = fmtMoney(totalSangrias);
+  document.getElementById('reportNetBalance').textContent = fmtMoney(netBalance);
+
+  const rangeLabel = `${range.start.toLocaleDateString('pt-BR')} a ${range.end.toLocaleDateString('pt-BR')}`;
+  document.getElementById('reportPeriodLabel').textContent = onlyMine
+    ? `Seus lançamentos de hoje · ${rangeLabel}`
+    : `${PERIOD_LABELS[period]} · ${rangeLabel}`;
+
+  const generatedAt = new Date().toLocaleString('pt-BR');
+  document.getElementById('printReportMeta').textContent = onlyMine
+    ? `Operador: ${session.currentUser.name} · Período: ${rangeLabel} · Gerado em ${generatedAt}`
+    : `Período: ${PERIOD_LABELS[period]} (${rangeLabel}) · Gerado em ${generatedAt}`;
+
+  renderReportTable(records);
+
+  const isAdmin = session.currentUser?.role === 'admin';
+  document.getElementById('profitAnalysisWrap').classList.toggle('hidden', !isAdmin);
+  if(isAdmin){
+    renderProfitAndABC(records);
+  }
+
+  document.getElementById('reportEmptyState').classList.add('hidden');
+  document.getElementById('reportResults').classList.remove('hidden');
+}
+
+/* -- Lucro Líquido (Faturamento vs. Custo) e Curva ABC de produtos -- */
+
+// Fallback: se o produto não tiver Preço de Custo cadastrado, estima 70% do preço de venda
+// para que os cálculos de lucro nunca quebrem por falta desse dado.
+function getProductCost(product){
+  if(!product) return 0;
+  const hasRealCost = product.costPrice !== null && product.costPrice !== undefined && !isNaN(product.costPrice);
+  return hasRealCost ? product.costPrice : product.price * 0.7;
+}
+
+function renderProfitAndABC(records){
+  const saleRecords = records.filter(s => s.type === 'venda');
+
+  let totalRevenue = 0;
+  let totalCost = 0;
+  let usedFallbackCost = false;
+  const perProduct = {}; // productId -> { name, code, qty, revenue }
+
+  saleRecords.forEach(sale => {
+    (sale.products || []).forEach(item => {
+      const product = state.products.find(p => p.id === item.productId);
+      const revenue = item.qty * item.unitPrice;
+      const hasRealCost = product && product.costPrice !== null && product.costPrice !== undefined && !isNaN(product.costPrice);
+      if(!hasRealCost) usedFallbackCost = true;
+      const cost = item.qty * getProductCost(product);
+
+      totalRevenue += revenue;
+      totalCost += cost;
+
+      const key = item.productId;
+      if(!perProduct[key]){
+        perProduct[key] = {
+          name: product ? product.name : 'Produto removido',
+          code: product ? product.code : '—',
+          qty: 0,
+          revenue: 0
+        };
+      }
+      perProduct[key].qty += item.qty;
+      perProduct[key].revenue += revenue;
+    });
+  });
+
+  const netProfit = totalRevenue - totalCost;
+  const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+  document.getElementById('reportTotalCost').textContent = fmtMoney(totalCost);
+  document.getElementById('reportNetProfit').textContent = fmtMoney(netProfit);
+  document.getElementById('reportProfitMargin').textContent = `${margin.toFixed(1)}%`;
+
+  const fallbackNote = document.getElementById('profitCostFallbackNote');
+  fallbackNote.textContent = usedFallbackCost
+    ? 'Alguns produtos ainda não têm Preço de Custo cadastrado — o sistema está estimando 70% do preço de venda para eles. Edite o produto no Estoque para informar o custo real.'
+    : '';
+
+  renderAbcTable(perProduct, totalRevenue);
+}
+
+function renderAbcTable(perProduct, totalRevenue){
+  const tbody = document.getElementById('abcTableBody');
+  tbody.innerHTML = '';
+
+  const list = Object.values(perProduct).sort((a, b) => b.revenue - a.revenue);
+
+  if(list.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Nenhuma venda de produto no período selecionado.</td></tr>`;
+    return;
+  }
+
+  const topRevenue = list[0].revenue || 1;
+  let cumulative = 0;
+
+  list.forEach(item => {
+    const share = totalRevenue > 0 ? (item.revenue / totalRevenue) * 100 : 0;
+    cumulative += share;
+    const classe = cumulative <= 80 ? 'a' : (cumulative <= 95 ? 'b' : 'c');
+    const barWidth = Math.max(4, (item.revenue / topRevenue) * 100);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="abc-product-name">${item.name}</span></td>
+      <td>${item.code}</td>
+      <td>${item.qty}</td>
+      <td>
+        <div class="abc-revenue-cell">
+          <strong>${fmtMoney(item.revenue)}</strong>
+          <div class="abc-bar-track"><div class="abc-bar-fill" style="width:${barWidth}%;"></div></div>
+        </div>
+      </td>
+      <td>${share.toFixed(1)}%</td>
+      <td><span class="abc-badge classe-${classe}">${classe.toUpperCase()}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderReportTable(records){
+  const tbody = document.getElementById('reportTableBody');
+  tbody.innerHTML = '';
+
+  if(records.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Nenhum lançamento encontrado no período selecionado.</td></tr>`;
+    return;
+  }
+
+  records.forEach(r => {
+    const dateStr = new Date(r.date).toLocaleString('pt-BR');
+    let paymentText = '—';
+    if(r.type === 'venda'){
+      paymentText = PAYMENT_LABELS[r.paymentMethod] || r.paymentMethod || '—';
+      if(r.paymentMethod === 'credito' && r.installments > 1) paymentText += ` (${r.installments}x)`;
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td><span class="type-badge ${r.type}">${r.type === 'venda' ? 'Venda' : 'Sangria'}</span></td>
+      <td>${r.userName}</td>
+      <td>${paymentText}</td>
+      <td style="text-align:right;"><strong>${fmtMoney(r.totalValue)}</strong></td>
+    `;
+    tbody.appendChild(tr);
+
+    if(r.type === 'sangria'){
+      const detailTr = document.createElement('tr');
+      detailTr.className = 'sangria-detail-row';
+      detailTr.innerHTML = `
+        <td colspan="5">
+          <div class="sangria-detail-box">
+            <span>💬 <b>Motivo:</b> ${r.obs || '—'}</span>
+            <span>🔒 <b>Autorizado por:</b> ${r.authAdminName || '—'}</span>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(detailTr);
+    }
+  });
+}
+
+/* --------------------------------------------------------------------------
+   CLIENTES — identificação no PDV, cadastro e histórico de compras
+-------------------------------------------------------------------------- */
+let selectedCustomerId = null;
+
+function normalizeForSearch(str){
+  return (str || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+function onlyDigits(str){ return (str || '').toString().replace(/\D/g, ''); }
+
+function formatCpfInput(value){
+  const digits = onlyDigits(value).slice(0, 11);
+  let out = digits;
+  if(digits.length > 9) out = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6,9)}-${digits.slice(9)}`;
+  else if(digits.length > 6) out = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6)}`;
+  else if(digits.length > 3) out = `${digits.slice(0,3)}.${digits.slice(3)}`;
+  return out;
+}
+document.getElementById('customerFormCpf').addEventListener('input', (e) => {
+  e.target.value = formatCpfInput(e.target.value);
+});
+
+function getCustomerTotalSpent(customer){
+  return (customer.purchases || []).reduce((sum, p) => sum + p.totalValue, 0);
+}
+function getCustomerLastPurchaseDate(customer){
+  const purchases = customer.purchases || [];
+  if(purchases.length === 0) return null;
+  return purchases.reduce((latest, p) => (new Date(p.date) > new Date(latest.date) ? p : latest), purchases[0]).date;
+}
+
+/* -- Busca e seleção do cliente no PDV -- */
+const pdvCustomerSearch = document.getElementById('pdvCustomerSearch');
+const pdvCustomerResults = document.getElementById('pdvCustomerResults');
+
+pdvCustomerSearch.addEventListener('input', () => {
+  const term = normalizeForSearch(pdvCustomerSearch.value);
+  const termDigits = onlyDigits(pdvCustomerSearch.value);
+  pdvCustomerResults.innerHTML = '';
+
+  if(!term){ return; }
+
+  const matches = state.customers.filter(c =>
+    normalizeForSearch(c.name).includes(term) || (termDigits && onlyDigits(c.cpf).includes(termDigits))
+  ).slice(0, 6);
+
+  if(matches.length === 0){
+    pdvCustomerResults.innerHTML = `<div class="customer-result-empty">Nenhum cliente encontrado. Use "+ Cadastrar novo cliente" abaixo.</div>`;
+    return;
+  }
+
+  matches.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'customer-result-item';
+    item.innerHTML = `<div class="customer-result-name">${c.name}</div><div class="customer-result-cpf">${c.cpf}</div>`;
+    item.addEventListener('click', () => selectCustomer(c.id));
+    pdvCustomerResults.appendChild(item);
+  });
+});
+
+function selectCustomer(customerId){
+  const customer = state.customers.find(c => c.id === customerId);
+  if(!customer) return;
+  selectedCustomerId = customerId;
+
+  document.getElementById('pdvCustomerChipName').textContent = customer.name;
+  document.getElementById('pdvCustomerChipCpf').textContent = customer.cpf;
+  document.getElementById('pdvCustomerChip').classList.remove('hidden');
+
+  pdvCustomerSearch.value = '';
+  pdvCustomerSearch.classList.add('hidden');
+  pdvCustomerResults.innerHTML = '';
+  showToast(`Cliente identificado: ${customer.name}.`, 'success');
+}
+
+function clearCustomerSelection(){
+  selectedCustomerId = null;
+  document.getElementById('pdvCustomerChip').classList.add('hidden');
+  pdvCustomerSearch.classList.remove('hidden');
+  pdvCustomerSearch.value = '';
+  pdvCustomerResults.innerHTML = '';
+}
+
+document.getElementById('pdvCustomerRemoveBtn').addEventListener('click', () => {
+  clearCustomerSelection();
+  showToast('Identificação removida. Venda seguirá como Consumidor Geral.', 'success');
+});
+
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('#pdvCustomerSearch') && !e.target.closest('#pdvCustomerResults')){
+    pdvCustomerResults.innerHTML = '';
+  }
+});
+
+/* -- Cadastro/edição de cliente (modal reutilizado pelo PDV e pela aba Clientes) -- */
+let customerModalMode = 'create';
+let customerModalOrigin = 'tab'; // 'tab' | 'pdv' — de onde o modal foi aberto
+const customerModalOverlay = document.getElementById('customerModalOverlay');
+
+function openCustomerModal(mode, customer = null, origin = 'tab', prefillName = ''){
+  customerModalMode = mode;
+  customerModalOrigin = origin;
+  const form = document.getElementById('customerForm');
+  form.reset();
+  document.getElementById('customerFormId').value = '';
+
+  if(mode === 'create'){
+    document.getElementById('customerModalTitle').textContent = 'Novo cliente';
+    if(prefillName) document.getElementById('customerFormName').value = prefillName;
+  }else{
+    document.getElementById('customerModalTitle').textContent = 'Editar cliente';
+    document.getElementById('customerFormId').value = customer.id;
+    document.getElementById('customerFormName').value = customer.name;
+    document.getElementById('customerFormCpf').value = customer.cpf;
+  }
+  customerModalOverlay.classList.add('show');
+  setTimeout(() => document.getElementById('customerFormName')?.focus(), 150);
+}
+function closeCustomerModal(){ customerModalOverlay.classList.remove('show'); }
+
+document.getElementById('openNewCustomerModalFromTab').addEventListener('click', () => openCustomerModal('create', null, 'tab'));
+document.getElementById('pdvNewCustomerBtn').addEventListener('click', () => openCustomerModal('create', null, 'pdv', pdvCustomerSearch.value.trim()));
+document.getElementById('closeCustomerModal').addEventListener('click', closeCustomerModal);
+document.getElementById('cancelCustomerModal').addEventListener('click', closeCustomerModal);
+customerModalOverlay.addEventListener('click', (e) => { if(e.target === customerModalOverlay) closeCustomerModal(); });
+
+document.getElementById('customerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('customerFormId').value;
+  const name = document.getElementById('customerFormName').value.trim();
+  const cpf = document.getElementById('customerFormCpf').value.trim();
+
+  if(!name || onlyDigits(cpf).length !== 11){
+    showToast('Informe o nome completo e um CPF válido (11 dígitos).', 'error');
+    return;
+  }
+  const duplicateCpf = state.customers.some(c => onlyDigits(c.cpf) === onlyDigits(cpf) && c.id !== id);
+  if(duplicateCpf){
+    showToast('Já existe um cliente cadastrado com esse CPF.', 'error');
+    return;
+  }
+
+  let savedCustomer;
+  if(customerModalMode === 'create'){
+    savedCustomer = { id: uid(), name, cpf, createdAt: new Date().toISOString(), purchases: [] };
+    state.customers.push(savedCustomer);
+    showToast('Cliente cadastrado com sucesso!', 'success');
+  }else{
+    savedCustomer = state.customers.find(c => c.id === id);
+    savedCustomer.name = name;
+    savedCustomer.cpf = cpf;
+    showToast('Cliente atualizado com sucesso!', 'success');
+  }
+
+  saveState();
+  renderCustomersTable();
+  closeCustomerModal();
+
+  // Se o cadastro foi feito a partir do PDV, já identifica o cliente na venda atual
+  if(customerModalOrigin === 'pdv' && customerModalMode === 'create'){
+    selectCustomer(savedCustomer.id);
+  }
+});
+
+function renderCustomersTable(){
+  const tbody = document.getElementById('customersTableBody');
+  const searchInput = document.getElementById('customerTableSearch');
+  const term = normalizeForSearch(searchInput ? searchInput.value : '');
+  const termDigits = onlyDigits(searchInput ? searchInput.value : '');
+
+  let list = state.customers;
+  if(term || termDigits){
+    list = list.filter(c => normalizeForSearch(c.name).includes(term) || (termDigits && onlyDigits(c.cpf).includes(termDigits)));
+  }
+
+  tbody.innerHTML = '';
+  if(list.length === 0){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Nenhum cliente encontrado.</td></tr>`;
+    return;
+  }
+
+  list.forEach(c => {
+    const purchaseCount = (c.purchases || []).length;
+    const lastDate = getCustomerLastPurchaseDate(c);
+    const totalSpent = getCustomerTotalSpent(c);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${c.name}</strong></td>
+      <td>${c.cpf}</td>
+      <td>${purchaseCount}</td>
+      <td>${lastDate ? new Date(lastDate).toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${fmtMoney(totalSpent)}</td>
+      <td>
+        <div class="table-actions">
+          <button class="btn btn-ghost btn-sm" data-action="history-customer" data-id="${c.id}">Ver histórico</button>
+          <button class="btn btn-ghost btn-sm" data-action="edit-customer" data-id="${c.id}">Editar</button>
+          <button class="btn btn-icon icon-danger-btn" data-action="delete-customer" data-id="${c.id}" title="Excluir cliente">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-action="edit-customer"]').forEach(btn => btn.addEventListener('click', () => openCustomerModal('edit', state.customers.find(x => x.id === btn.dataset.id), 'tab')));
+  tbody.querySelectorAll('[data-action="history-customer"]').forEach(btn => btn.addEventListener('click', () => openCustomerHistoryModal(btn.dataset.id)));
+  tbody.querySelectorAll('[data-action="delete-customer"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = state.customers.find(x => x.id === btn.dataset.id);
+      if(confirm(`Excluir definitivamente o cliente "${c.name}"? O histórico de compras associado será perdido.`)){
+        state.customers = state.customers.filter(x => x.id !== c.id);
+        if(selectedCustomerId === c.id) clearCustomerSelection();
+        saveState();
+        renderCustomersTable();
+        showToast('Cliente removido.', 'success');
+      }
+    });
+  });
+}
+
+document.getElementById('customerTableSearch').addEventListener('input', renderCustomersTable);
+
+/* -- Histórico de compras (perfil de consumo) -- */
+const customerHistoryModalOverlay = document.getElementById('customerHistoryModalOverlay');
+
+function openCustomerHistoryModal(customerId){
+  const customer = state.customers.find(c => c.id === customerId);
+  if(!customer) return;
+
+  document.getElementById('customerHistoryTitle').textContent = `Histórico de ${customer.name}`;
+  document.getElementById('customerHistorySubtitle').textContent =
+    `CPF: ${customer.cpf} · Total gasto: ${fmtMoney(getCustomerTotalSpent(customer))}`;
+
+  const listWrap = document.getElementById('customerHistoryList');
+  const purchases = [...(customer.purchases || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if(purchases.length === 0){
+    listWrap.innerHTML = `<p class="hint" style="display:block;">Este cliente ainda não possui compras registradas.</p>`;
+  }else{
+    listWrap.innerHTML = purchases.map(p => {
+      const productsText = p.products.map(item => `${item.name} (x${item.qty})`).join(', ');
+      return `
+        <div class="customer-history-item">
+          <div class="customer-history-top">
+            <span class="customer-history-date">${new Date(p.date).toLocaleString('pt-BR')}</span>
+            <span class="customer-history-value">${fmtMoney(p.totalValue)}</span>
+          </div>
+          <div class="customer-history-products">${productsText}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  customerHistoryModalOverlay.classList.add('show');
+}
+document.getElementById('closeCustomerHistoryModal').addEventListener('click', () => customerHistoryModalOverlay.classList.remove('show'));
+document.getElementById('closeCustomerHistoryModalBtn').addEventListener('click', () => customerHistoryModalOverlay.classList.remove('show'));
+customerHistoryModalOverlay.addEventListener('click', (e) => { if(e.target === customerHistoryModalOverlay) customerHistoryModalOverlay.classList.remove('show'); });
+
+/* --------------------------------------------------------------------------
+   ATALHOS DE TECLADO (operação sem mouse dentro do PDV)
+   F2  -> foca no campo de bipagem
+   F4  -> foca no campo de quantidade
+   F7  -> abre o modal de sangria de caixa
+   F10 -> abre o modal de forma de pagamento
+   Esc -> fecha qualquer modal aberto
+   Ctrl+Delete -> limpa o carrinho instantaneamente
+-------------------------------------------------------------------------- */
+function closeAnyOpenModal(){
+  document.querySelectorAll('.modal-overlay.show').forEach(overlay => overlay.classList.remove('show'));
+}
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    const hasOpenModal = document.querySelector('.modal-overlay.show');
+    if(hasOpenModal){ e.preventDefault(); closeAnyOpenModal(); }
+    return;
+  }
+
+  const activeTab = document.querySelector('.nav-item.active')?.dataset.tab;
+  if(activeTab !== 'pdv') return;
+
+  if(e.ctrlKey && e.key === 'Delete'){
+    e.preventDefault();
+    if(cart.length === 0) return;
+    cart = [];
+    renderCart();
+    showToast('Carrinho limpo com Ctrl+Delete.', 'success');
+    return;
+  }
+
+  if(e.key === 'F2'){
+    e.preventDefault();
+    document.getElementById('pdvBarcodeInput')?.focus();
+  }else if(e.key === 'F4'){
+    e.preventDefault();
+    const qtyField = document.getElementById('pdvQtyOverride');
+    qtyField?.focus();
+    qtyField?.select();
+  }else if(e.key === 'F7'){
+    e.preventDefault();
+    document.getElementById('pdvSangriaBtn')?.click();
+  }else if(e.key === 'F10'){
+    e.preventDefault();
+    openPaymentModal();
+  }
+});
+
+/* --------------------------------------------------------------------------
+   BOOTSTRAP
+-------------------------------------------------------------------------- */
+function bootstrap(){
+  initTheme();
+  ensureDefaultCategory();
+  initAuthScreen();
+  populateInstallmentsSelect();
+  populatePaymentModalInstallments();
+}
+bootstrap();
+</script>
+</body>
+</html>
